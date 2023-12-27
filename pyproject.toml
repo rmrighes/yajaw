@@ -14,12 +14,18 @@ authors = [
   { name = "rmrighes", email = "rmrighes@users.noreply.github.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 1 - Planning",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = [
+  "asyncio",
+  "requests",
+]
 
 [project.urls]
 Documentation = "https://github.com/rmrighes/yajaw#readme"
