@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "yajaw"
+dynamic = ["version"]
+description = 'Yet Another Jira API Wrapper'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "Apache-2.0"
+keywords = []
+authors = [
+  { name = "rmrighes", email = "rmrighes@users.noreply.github.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/rmrighes/yajaw#readme"
+Issues = "https://github.com/unknown/rmrighes/issues"
+Source = "https://github.com/rmrighes/yajaw"
+
+[tool.hatch.version]
+path = "src/yajaw/__about__.py"
+
+[tool.hatch.envs.default]
+python = "3.12"
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/yajaw tests}"
+
+[tool.coverage.run]
+source_pkgs = ["yajaw", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/yajaw/__about__.py",
+]
+
+[tool.coverage.paths]
+yajaw = ["src/yajaw", "*/yajaw/src/yajaw"]
+tests = ["tests", "*/yajaw/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
