@@ -24,6 +24,8 @@ classifiers = [
 ]
 dependencies = [
   "asyncio",
+  "httpx",
+  "python-dotenv",
   "requests",
 ]
 
