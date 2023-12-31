@@ -28,6 +28,7 @@ async def slowdown_if_needed(resp) -> None:
     if int(resp.headers["x-ratelimit-remaining"]) < 25:
         await asyncio.sleep(0.3) # rate limiting control
 
+
 def is_success_response(resp) -> bool:
     if resp.status_code == httpx.codes.OK:
         return True
@@ -38,6 +39,7 @@ def rate_limit_reached(attempts: int) -> bool:
     if attempts >= 99: 
         return False
     return True
+
 
 def retry_request(resp, attempts) -> bool:
     log_message = f"Status Code: {resp.status_code} -- attempt {attempts:02d} -- {resp.request.method} {resp.request.url}"
