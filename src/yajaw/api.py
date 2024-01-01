@@ -9,15 +9,7 @@ from .configuration import *
 #######################################
 
 
-def flatten_gathered_responses(group_resp) -> list:
-    flatten_resp = list()
-    for task_resp in group_resp:
-        for resp in task_resp.json():
-            flatten_resp.append(resp)
-    return flatten_resp
-
-
-def convert_gathered_responses_to_json(group_resp) -> list:
+def convert_gathered_responses_to_json(group_resp) -> list[any]:
     converted_list = list()
     for task_resp in group_resp:
         converted_list.append(task_resp.json())
@@ -36,14 +28,14 @@ def is_success_response(resp) -> bool:
 
 
 def rate_limit_reached(attempts: int) -> bool:
-    if attempts >= 99: 
-        return False
-    return True
+    if attempts >= 10: 
+        return True
+    return False
 
 
 def retry_request(resp, attempts) -> bool:
     log_message = f"Status Code: {resp.status_code} -- attempt {attempts:02d} -- {resp.request.method} {resp.request.url}"
-    if not rate_limit_reached(attempts):
+    if rate_limit_reached(attempts):
         retry = False
         logger.error(log_message)
     elif is_success_response(resp):
@@ -54,37 +46,93 @@ def retry_request(resp, attempts) -> bool:
         logger.warning(log_message)
     return retry
 
+def convert_response_obj_to_dict(resp: list[httpx.Response] | httpx.Response) -> list[dict[any]] | dict[any]:
+    if isinstance(resp, httpx.Response):
+        result = resp.json()
+    elif isinstance(resp, list):
+        result = list()
+        for single_response in resp:
+            result.append(single_response.json())
+    return result
+
+def extract_values_from_key_in_list_of_dict(grouped_response: list[dict[any]], key: str) -> list[any]:
+    r = list()
+    for single_group in grouped_response:
+        for item in single_group[key]:
+            r.append(item)
+    return r
+
+
 #######################################
 # REST Calls
 #######################################
 
 
-def set_request_headers() -> dict:
+def set_request_headers() -> dict[any]:
     return { "Accept": "application/json",
-          "Authorization": f"Bearer {JIRA_PAT}"} 
+             "Authorization": f"Bearer {JIRA_PAT}"}
 
 
-async def send_request(client: httpx.AsyncClient, 
-                       semaphore: asyncio.BoundedSemaphore, 
-                       method: str, 
-                       url: str, 
-                       headers: dict) -> httpx.Response:
-
+async def send_request(client: httpx.AsyncClient = None, 
+                       semaphore: asyncio.BoundedSemaphore = None, 
+                       method: str = None, 
+                       url: str = None, 
+                       headers: dict = None,
+                       params: dict = None,
+                       payload: dict = None) -> httpx.Response:
     async with semaphore:
-
         attempts = 0
         retry = True
-        
         while retry:
-        
-            response = await client.request(method = method, 
-                                            url = url, 
-                                            headers = headers)
+            response = await client.request(method=method, 
+                                            url=url, 
+                                            headers=headers,
+                                            params=params,
+                                            json=payload)
             attempts += 1
+            # TODO: check if a valid httpx.Response object was returned
             await slowdown_if_needed(response)
             retry = retry_request(response, attempts)
-
     return response
+
+
+# TODO: Calls to next page are sequential. 
+# It can be improved to become concurrent at the pagination level after the first call.
+async def send_request_paginated(client: httpx.AsyncClient = None, 
+                                 semaphore: asyncio.BoundedSemaphore = None,
+                                 method: str = None, 
+                                 url: str = None, 
+                                 headers: dict = None,
+                                 params: dict = None, 
+                                 payload: dict = None) -> list[httpx.Response]:
+    result = list()
+    startAt = payload["startAt"]
+    maxResults = payload["maxResults"]
+    more_pages = True
+    counter = 0
+    while more_pages:
+        response = await send_request(client=client,
+                                      semaphore=semaphore,
+                                      method=method,
+                                      url=url,
+                                      headers=headers,
+                                      params=params,
+                                      payload=payload)
+        result.append(response)
+        
+        counter += 1
+        total = response.json()["total"]
+
+        print(f"Page {counter} - startAt {startAt} - total {total}")
+        print(payload)
+        if total < (startAt + maxResults):
+            more_pages = False
+        else:
+            startAt = startAt + maxResults
+            payload["startAt"] = startAt
+        
+    return result
+
 
 #######################################
 # Jira API
@@ -92,9 +140,9 @@ async def send_request(client: httpx.AsyncClient,
 
 
 #3.13? @deprecated("Use Get projects paginated that supports search and pagination")
-async def get_all_projects() -> list:
+async def get_all_projects() -> list[any]:
     headers = set_request_headers()
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         task = asyncio.create_task(send_request(client=client, 
                                                 semaphore=semaphore,
                                                 method="GET",
@@ -104,9 +152,9 @@ async def get_all_projects() -> list:
     return responses.json()
 
 
-async def get_project(key=str) -> dict:
+async def get_project(key=str) -> dict[any]:
     headers = set_request_headers()
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         task = asyncio.create_task(send_request(client=client, 
                                                 semaphore=semaphore,
                                                 method="GET",
@@ -116,13 +164,53 @@ async def get_project(key=str) -> dict:
     return response.json()
 
 
-async def get_projects_from_list(keys=list[str]) -> list:
+async def get_projects_from_list(keys=list[str]) -> list[any]:
     headers = set_request_headers()
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         tasks = [ asyncio.create_task(send_request(client=client, 
                                                    semaphore=semaphore,
                                                    method="GET",
                                                    url=f"{JIRA_BASE_URL}/{JIRA_API}/project/{key}", 
                                                    headers=headers)) for key in keys]
         group_responses = await asyncio.gather(*tasks)
-    return convert_gathered_responses_to_json(group_responses)
+    return convert_response_obj_to_dict(group_responses)
+
+
+async def search_issues_jql(jql: str = None) -> list[any]:
+    headers = set_request_headers()
+    payload = { "jql": f"{jql}", 
+                "startAt": 0, 
+                "maxResults": 50}
+    async with httpx.AsyncClient(verify=False, timeout=30.0) as client:
+        task = asyncio.create_task(
+            send_request_paginated(client=client, 
+                                   semaphore=semaphore,
+                                   method="POST",
+                                   url=f"{JIRA_BASE_URL}/{JIRA_API}/search", 
+                                   headers=headers,
+                                   payload=payload))
+        response = await task
+        processed_response = convert_response_obj_to_dict(response)
+        issues = list()
+        issues = extract_values_from_key_in_list_of_dict(processed_response, "issues")
+
+        return issues
+    
+async def get_issues_from_project(key: str | list[str]) -> list[any]:
+    # A single string with a project key
+    if isinstance(key, str):
+        jql = f"project = {key}"
+        return await search_issues_jql(jql=jql)
+    # A list of strings with project keys
+    # TODO: Make it concurrent per project
+    elif isinstance(key, list):
+        list_responses = list()
+        list_issues = list()
+        for proj in key:
+            jql = f"project = {proj}"
+            list_responses.append(await search_issues_jql(jql=jql))
+        # List of lists of dictionaries --> flattened list of dictionaries
+        for project in list_responses:
+            for issue in project:
+                list_issues.append(issue)
+        return list_issues
