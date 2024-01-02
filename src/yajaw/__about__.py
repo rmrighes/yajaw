@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-present Rafael Maestri Righes <rmr.online@outlook.com>
+# SPDX-FileCopyrightText: 2023-present rmrighes <rmrighes@users.noreply.github.com>
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
 __version__ = "0.0.1"

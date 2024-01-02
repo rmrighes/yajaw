@@ -8,18 +8,25 @@ dynamic = ["version"]
 description = 'Yet Another Jira API Wrapper'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "Apache-2.0"
+license = "MIT"
 keywords = []
 authors = [
   { name = "rmrighes", email = "rmrighes@users.noreply.github.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 1 - Planning",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = [
+  "asyncio",
+  "httpx",
+  "python-dotenv"
+]
 
 [project.urls]
 Documentation = "https://github.com/rmrighes/yajaw#readme"
