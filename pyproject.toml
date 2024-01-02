@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'Yet Another Jira API Wrapper'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "Apache-2.0"
+license = "MIT"
 keywords = []
 authors = [
   { name = "rmrighes", email = "rmrighes@users.noreply.github.com" },
