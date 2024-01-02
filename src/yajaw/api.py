@@ -46,6 +46,7 @@ def retry_request(resp, attempts) -> bool:
         logger.warning(log_message)
     return retry
 
+
 def convert_response_obj_to_dict(resp: list[httpx.Response] | httpx.Response) -> list[dict[any]] | dict[any]:
     if isinstance(resp, httpx.Response):
         result = resp.json()
@@ -54,6 +55,7 @@ def convert_response_obj_to_dict(resp: list[httpx.Response] | httpx.Response) ->
         for single_response in resp:
             result.append(single_response.json())
     return result
+
 
 def extract_values_from_key_in_list_of_dict(grouped_response: list[dict[any]], key: str) -> list[any]:
     r = list()
@@ -123,8 +125,8 @@ async def send_request_paginated(client: httpx.AsyncClient = None,
         counter += 1
         total = response.json()["total"]
 
-        print(f"Page {counter} - startAt {startAt} - total {total}")
-        print(payload)
+        logger.info(f"Page {counter} - startAt {startAt} - total {total}")
+        logger.info(payload)
         if total < (startAt + maxResults):
             more_pages = False
         else:
@@ -193,24 +195,27 @@ async def search_issues_jql(jql: str = None) -> list[any]:
         processed_response = convert_response_obj_to_dict(response)
         issues = list()
         issues = extract_values_from_key_in_list_of_dict(processed_response, "issues")
-
         return issues
-    
+
+def get_next_project_jql(project_key: str):
+    return f'project = {project_key}'
+
+
+def flatten_list_of_dictionaries(input_list: list[list[dict[any]]]) -> list[dict]:
+    flattened_list = list()
+    for nested_list in input_list:
+        for item in nested_list:
+            flattened_list.append(item)
+    return flattened_list
+
+
 async def get_issues_from_project(key: str | list[str]) -> list[any]:
     # A single string with a project key
     if isinstance(key, str):
-        jql = f"project = {key}"
+        jql = get_next_project_jql(key)
         return await search_issues_jql(jql=jql)
     # A list of strings with project keys
-    # TODO: Make it concurrent per project
     elif isinstance(key, list):
-        list_responses = list()
-        list_issues = list()
-        for proj in key:
-            jql = f"project = {proj}"
-            list_responses.append(await search_issues_jql(jql=jql))
-        # List of lists of dictionaries --> flattened list of dictionaries
-        for project in list_responses:
-            for issue in project:
-                list_issues.append(issue)
-        return list_issues
+        tasks = [ asyncio.create_task(search_issues_jql(jql=get_next_project_jql(next_key))) for next_key in key ]
+        list_responses = await asyncio.gather(*tasks)
+        return flatten_list_of_dictionaries(list_responses)

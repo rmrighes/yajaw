@@ -33,11 +33,14 @@ async def main() -> None:
     #response = await jira_api.get_issues_from_project(key=proj_key)
     #print(len(response))
 
-    proj_key = ["ETOE", "EMI"]
+    time_start = perf_counter()
+    proj_key = ["ETOE", "ESTT"]
     response = await jira_api.get_issues_from_project(key=proj_key)
     for issue in response:
         print(f'{issue["fields"]["project"]["name"]} :: {issue["key"]}')
     print(len(response))
+    time_finish = perf_counter()
+    print(f"Total get_issues_from_projects is {time_finish - time_start} seconds.")
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))
