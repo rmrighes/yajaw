@@ -2,7 +2,7 @@ import asyncio
 import httpx
 
 # 3.13? from warnings import deprecated
-from .configuration import *
+from .settings import *
 
 
 #######################################
