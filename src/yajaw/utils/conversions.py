@@ -1,35 +1,38 @@
 import httpx
 
-
-def convert_list_of_response_objects_to_list_of_json(
-    list_objects: list[httpx.Response],
-) -> list[dict[any]]:
-    return [convert_response_object_to_json(item) for item in list_objects]
+type list_responses = list[dict[any]]
+type single_response = dict[any]
 
 
-def convert_response_object_to_json(response_object: httpx.Response) -> dict[any]:
-    return response_object.json()
+def validate_responses_attribute(responses: list[httpx.Response]) -> None:
+    if isinstance(responses, list):
+        if all(isinstance(response, httpx.Response) for response in responses):
+            return None
+    raise InvalidResponseException
 
 
-def flatten_nested_list(nested_list: list[list[any]]) -> list[any]:
-    flat_list = [item for sublist in nested_list for item in sublist]
-    return flat_list
+def process_responses(
+    responses: list[httpx.Response], list_resources: bool
+) -> single_response | list_responses:
+    validate_responses_attribute(responses)
+    processed_responses = convert_responses_to_json(responses)
+    if not list_resources and len(processed_responses) == 1:
+        processed_responses = processed_responses[0]
+    return processed_responses
 
 
-def flatten_json(nested_json: dict[any], field: str) -> dict[any]:
-    ...
+def convert_responses_to_json(responses: list[httpx.Response]) -> list_responses:
+    processed_responses = list()
+    for response in responses:
+        converted_response = response.json()
+        if isinstance(converted_response, dict):
+            processed_responses.append(converted_response)
+        elif isinstance(converted_response, list):
+            [processed_responses.append(resource) for resource in converted_response]
+        else:
+            raise InvalidResponseException
+    return processed_responses
 
 
-"""
-Takes the list of concurrent responses, convert the httpx.Response objects into
-JSON (dictionaries) and then flatten the resulting nested lists.
-
-1. List of lists of httpx.Response --> List of lists of JSON
-2. List of lists of JSON (dictionaries) --> to List of JSON (dictionaries)
-"""
-
-
-def generate_list_of_responses(responses: list[list[any]]) -> list[dict[any]]:
-    list_json = convert_list_of_response_objects_to_list_of_json(responses)
-    flatten_list = flatten_nested_list(list_json)
-    return flatten_list
+class InvalidResponseException(Exception):
+    "Response is not valid!"

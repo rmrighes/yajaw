@@ -2,8 +2,6 @@ import asyncio
 import httpx
 from typing import TypedDict
 from yajaw import settings
-from yajaw.utils import conversions
-
 
 # Classes for type hints
 
@@ -72,7 +70,7 @@ Controls concurrency and paginated requests for a single resource
 """
 
 
-async def send_paginated_request(method: str, resource: str) -> list[httpx.Response]:
+async def send_concurrent_requests(method: str, resource: str) -> list[httpx.Response]:
     responses = list()
     client = generate_client()
     url = generate_url(resource=resource)
@@ -80,5 +78,4 @@ async def send_paginated_request(method: str, resource: str) -> list[httpx.Respo
         task = asyncio.create_task(send_request(client=client, method=method, url=url))
         response = await task
     responses.append(response)
-    converted_responses = conversions.generate_list_of_responses(responses)
-    return converted_responses
+    return responses
