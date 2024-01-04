@@ -6,27 +6,31 @@ type list_responses = list[dict[any]]
 type single_response = dict[any]
 
 
-def fetch_all_projects(expand: str = None) -> list_responses:
+async def async_fetch_all_projects(expand: str = None) -> list_responses:
     method = "GET"
     resource = "project"
-    # Enable a synchronous function execute an asynchronous one
-    loop = asyncio.get_event_loop()
-    coroutine = rest.send_concurrent_requests(method=method, resource=resource)
-    loop_result = loop.run_until_complete(coroutine)
-    projects = conversions.process_responses(responses=loop_result, list_resources=True)
+    response = await rest.send_concurrent_requests(method=method, resource=resource)
+    projects = conversions.process_responses(responses=response, list_resources=True)
     return projects
 
+def fetch_all_projects(expand: str = None) -> list_responses:
+    loop = asyncio.get_event_loop()
+    coroutine = async_fetch_all_projects(expand=expand)
+    return loop.run_until_complete(coroutine)
 
-def fetch_project(project_key: str, expand: str = None) -> single_response:
+async def async_fetch_project(project_key: str, expand: str = None) -> single_response:
     method = "GET"
     resource = f"project/{project_key}"
-    # Enable a synchronous function execute an asynchronous one
-    loop = asyncio.get_event_loop()
-    coroutine = rest.send_concurrent_requests(method=method, resource=resource)
-    loop_result = loop.run_until_complete(coroutine)
-    project = conversions.process_responses(responses=loop_result, list_resources=False)
+    response = await rest.send_concurrent_requests(method=method, resource=resource)
+    project = conversions.process_responses(responses=response, list_resources=False)
     return project
 
+def fetch_project(project_key: str, expand: str = None) -> single_response:
+    loop = asyncio.get_event_loop()
+    coroutine = async_fetch_project(project_key=project_key, expand=expand)
+    return loop.run_until_complete(coroutine)    
+
+# Review under this point
 
 def fetch_projects_from_list(
     project_keys: list[str], expand: str = None
