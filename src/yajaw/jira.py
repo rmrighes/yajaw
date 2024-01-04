@@ -10,7 +10,7 @@ async def async_fetch_all_projects(expand: str = None) -> list_responses:
     method = "GET"
     resource = "project"
     response = await rest.send_single_request(method=method, resource=resource)
-    projects = conversions.process_responses(responses=response, list_resources=True)
+    projects = conversions.process_multiple_nonpaginated_resources(responses=response)
     return projects
 
 
@@ -24,7 +24,7 @@ async def async_fetch_project(project_key: str, expand: str = None) -> single_re
     method = "GET"
     resource = f"project/{project_key}"
     response = await rest.send_single_request(method=method, resource=resource)
-    project = conversions.process_responses(responses=response, list_resources=False)
+    project = conversions.process_single_nonpaginated_resource(responses=response)
     return project
 
 
@@ -59,7 +59,7 @@ async def async_fetch_issue(
     method = "GET"
     resource = f"issue/{issue_key}"
     response = await rest.send_single_request(method=method, resource=resource)
-    issue = conversions.process_responses(responses=response, list_resources=False)
+    issue = conversions.process_single_nonpaginated_resource(responses=response)
     return issue
 
 
@@ -69,11 +69,30 @@ def fetch_issue(issue_key: str, expand: str = None) -> single_response:
     return loop.run_until_complete(coroutine)
 
 
-# Review under this point
+async def async_search_issues(
+    jql: str, expand: str = None, fields: str = None
+) -> list_responses:
+    method = "POST"
+    resource = f"search"
+    content = {"jql": jql}
+    field = "issues"
+    payload = rest.generate_payload(content)
+    response = await rest.send_paginated_requests(
+        method=method, resource=resource, payload=payload
+    )
+    issues = conversions.process_multiple_paginated_resources(
+        responses=response, field=field
+    )
+    return issues
 
 
 def search_issues(jql: str, expand: str = None, fields: str = None) -> list_responses:
-    ...
+    loop = asyncio.get_event_loop()
+    coroutine = async_search_issues(jql=jql, expand=expand, fields=fields)
+    return loop.run_until_complete(coroutine)
+
+
+# Review under this point
 
 
 def fetch_all_issues_from_projects(

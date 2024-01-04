@@ -34,13 +34,17 @@ class PersonalAccessTokenAuth(httpx.Auth):
 
 
 def generate_headers() -> dict[str]:
-    return {
-        "Accept": "application/json",
-    }
+    return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
 def generate_params() -> dict[str]:
     ...
+
+
+def generate_payload(content: dict[str]) -> dict[str]:
+    payload = dict()
+    payload.update(content)
+    return payload
 
 
 def generate_auth() -> PersonalAccessTokenAuth:
@@ -52,13 +56,15 @@ def generate_url(resource: str) -> str:
 
 
 def generate_client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(auth=generate_auth(), headers=generate_headers())
+    return httpx.AsyncClient(
+        auth=generate_auth(), headers=generate_headers(), timeout=None
+    )
 
 
 async def send_request(
-    client: httpx.AsyncClient, method: str, url: str
+    client: httpx.AsyncClient, method: str, url: str, payload: dict[str] = None
 ) -> httpx.Response:
-    return await client.request(method=method, url=url)
+    return await client.request(method=method, url=url, json=payload)
 
 
 def generate_pagination(response: httpx.Response) -> PaginationInfo | None:
@@ -69,22 +75,32 @@ def generate_pagination(response: httpx.Response) -> PaginationInfo | None:
 Controls concurrency and paginated requests for a single resource 
 """
 
-async def send_single_request(method: str, resource: str) -> list[httpx.Response]:
+
+async def send_single_request(
+    method: str, resource: str, payload: dict[str] = None
+) -> list[httpx.Response]:
     responses = list()
     client = generate_client()
     url = generate_url(resource=resource)
     async with client:
-        task = asyncio.create_task(send_request(client=client, method=method, url=url))
+        task = asyncio.create_task(
+            send_request(client=client, method=method, url=url, payload=payload)
+        )
         response = await task
     responses.append(response)
     return responses
 
-async def send_paginated_requests(method: str, resource: str) -> list[httpx.Response]:
+
+async def send_paginated_requests(
+    method: str, resource: str, payload: dict[str] = None
+) -> list[httpx.Response]:
     responses = list()
     client = generate_client()
     url = generate_url(resource=resource)
     async with client:
-        task = asyncio.create_task(send_request(client=client, method=method, url=url))
+        task = asyncio.create_task(
+            send_request(client=client, method=method, url=url, payload=payload)
+        )
         response = await task
     responses.append(response)
     return responses
