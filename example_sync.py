@@ -2,6 +2,7 @@ from yajaw import jira
 
 
 def main():
+
     print("Resource: project")
     projects = jira.fetch_all_projects(expand=None)
     [print(project["key"]) for project in projects]
@@ -11,6 +12,14 @@ def main():
     project = jira.fetch_project(project_key="ETOE", expand=None)
     print(project["key"])
 
+    print("Resource: project/{project_key} from list")
+    project_keys = {"ETOE","ESTT"}
+    projects = jira.fetch_projects_from_list(project_keys=project_keys)
+    [print(project["key"]) for project in projects]
+
+    print("Resource: issue/{issue_key}")
+    issue = jira.fetch_issue(issue_key="ETOE-8", expand=None)
+    print(f"{issue["key"]} -- {issue["fields"]["summary"]}")
 
 if __name__ == "__main__":
     main()

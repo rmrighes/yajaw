@@ -69,8 +69,17 @@ def generate_pagination(response: httpx.Response) -> PaginationInfo | None:
 Controls concurrency and paginated requests for a single resource 
 """
 
+async def send_single_request(method: str, resource: str) -> list[httpx.Response]:
+    responses = list()
+    client = generate_client()
+    url = generate_url(resource=resource)
+    async with client:
+        task = asyncio.create_task(send_request(client=client, method=method, url=url))
+        response = await task
+    responses.append(response)
+    return responses
 
-async def send_concurrent_requests(method: str, resource: str) -> list[httpx.Response]:
+async def send_paginated_requests(method: str, resource: str) -> list[httpx.Response]:
     responses = list()
     client = generate_client()
     url = generate_url(resource=resource)
