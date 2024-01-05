@@ -20,11 +20,12 @@ def main():
     issue = jira.fetch_issue(issue_key="ETOE-8", expand=None)
     print(f"{issue["key"]} -- {issue["fields"]["summary"]}")
 
-    # TODO: Return all pages. It is returning only the maxResults amount.
     print("Resource: search/{jql}")
     jql = "project = ETOE"
     issues = jira.search_issues(jql=jql)
     [print(issue["key"]) for issue in issues]
+    print(f"There is a total of {len(issues)} returned by the search.")
+
 
 if __name__ == "__main__":
     main()
