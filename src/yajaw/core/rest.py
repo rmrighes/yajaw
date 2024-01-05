@@ -159,5 +159,5 @@ async def send_paginated_requests(
                 for attributes in attributes_list
             ]
             paginated_responses = await asyncio.gather(*tasks)
-    responses.extend(paginated_responses)
+        responses.extend(paginated_responses)
     return responses
