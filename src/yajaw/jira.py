@@ -75,13 +75,13 @@ async def async_search_issues(
     method = "POST"
     resource = f"search"
     content = {"jql": jql}
-    field = "issues"
+    field_array = "issues"
     payload = rest.generate_payload(content)
     response = await rest.send_paginated_requests(
         method=method, resource=resource, payload=payload
     )
     issues = conversions.process_multiple_paginated_resources(
-        responses=response, field=field
+        responses=response, field_array=field_array
     )
     return issues
 

@@ -37,14 +37,16 @@ def generate_headers() -> dict[str]:
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params() -> dict[str]:
-    ...
+def generate_params(
+    new_params: dict[str], existing_params: dict[str] = dict()
+) -> dict[str]:
+    return existing_params | new_params
 
 
-def generate_payload(content: dict[str]) -> dict[str]:
-    payload = dict()
-    payload.update(content)
-    return payload
+def generate_payload(
+    new_content: dict[str], existing_content: dict[str] = dict()
+) -> dict[str]:
+    return existing_content | new_content
 
 
 def generate_auth() -> PersonalAccessTokenAuth:
@@ -62,13 +64,13 @@ def generate_client() -> httpx.AsyncClient:
 
 
 async def send_request(
-    client: httpx.AsyncClient, method: str, url: str, payload: dict[str] = None
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    params: dict[str] = None,
+    payload: dict[str] = None,
 ) -> httpx.Response:
-    return await client.request(method=method, url=url, json=payload)
-
-
-def generate_pagination(response: httpx.Response) -> PaginationInfo | None:
-    ...
+    return await client.request(method=method, url=url, params=params, json=payload)
 
 
 """
@@ -92,15 +94,70 @@ async def send_single_request(
 
 
 async def send_paginated_requests(
-    method: str, resource: str, payload: dict[str] = None
+    method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
     responses = list()
+    pagination = {"startAt": 0, "maxResults": 50}
+    if method == "GET":
+        params = generate_params(new_params=pagination)
+    elif method == "POST":
+        payload = generate_payload(new_content=pagination, existing_content=payload)
     client = generate_client()
     url = generate_url(resource=resource)
     async with client:
         task = asyncio.create_task(
-            send_request(client=client, method=method, url=url, payload=payload)
+            send_request(
+                client=client, method=method, url=url, params=params, payload=payload
+            )
         )
         response = await task
     responses.append(response)
+
+    # Check result for multiple pages
+    initial_response = responses[0].json()
+    start_at = initial_response["startAt"] if "startAt" in initial_response else None
+    max_results = (
+        initial_response["maxResults"] if "maxResults" in initial_response else None
+    )
+    total = initial_response["total"] if "total" in initial_response else None
+
+    if start_at + max_results < total:
+        start_at = max_results
+        page_list = [
+            start_at + i * max_results for i in range(int(total / max_results))
+        ]
+        pagination_list = [
+            {"startAt": page, "maxResults": max_results} for page in page_list
+        ]
+
+        attributes_list = list()
+        for pagination in pagination_list:
+            attributes = dict()
+            attributes["method"] = method
+            attributes["url"] = url
+            attributes["params"] = params
+            attributes["payload"] = payload
+            if method == "GET":
+                attributes["params"] = generate_params(new_params=pagination)
+            elif method == "POST":
+                attributes["payload"] = generate_payload(
+                    new_content=pagination, existing_content=payload
+                )
+            attributes_list.append(attributes)
+        client = generate_client()
+        async with client:
+            tasks = [
+                asyncio.create_task(
+                    send_request(
+                        client=client,
+                        method=attributes["method"],
+                        url=attributes["url"],
+                        params=attributes["params"],
+                        payload=attributes["payload"],
+                    )
+                )
+                for attributes in attributes_list
+            ]
+            paginated_responses = await asyncio.gather(*tasks)
+    responses.extend(paginated_responses)
     return responses

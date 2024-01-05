@@ -1,7 +1,5 @@
 import asyncio
 from yajaw import jira
-from yajaw.core import rest
-
 
 async def main():
 
@@ -24,11 +22,11 @@ async def main():
     issue = await jira.async_fetch_issue(issue_key=issue_key)
     print(f"{issue["key"]} -- {issue["fields"]["summary"]}")
 
-    # TODO: Return all pages. It is returning only the maxResults amount.
     print("Resource: search/{jql}")
-    jql = "project = ETOE"
+    jql = "project in (ETOE)"
     issues = await jira.async_search_issues(jql=jql)
-    [print(issue["key"]) for issue in issues]
+    [print(f"{issue["key"]} - {issue["fields"]["summary"]}") for issue in issues]
+    print(f"There is a total of {len(issues)} returned by the search.")
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))

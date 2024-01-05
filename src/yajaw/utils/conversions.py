@@ -26,12 +26,12 @@ def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):
     return consolidated_responses
 
 
-def process_multiple_paginated_resources(responses: list[httpx.Response], field: str):
+def process_multiple_paginated_resources(responses: list[httpx.Response], field_array: str):
     validate_responses_attribute(responses=responses)
     consolidated_responses = list()
     for single_response in responses:
         resources = single_response.json()
-        for resource in resources[field]:
+        for resource in resources[field_array]:
             consolidated_responses.append(resource)
     return consolidated_responses
 
