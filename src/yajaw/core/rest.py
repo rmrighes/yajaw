@@ -1,7 +1,7 @@
 import asyncio
 import httpx
 from typing import TypedDict
-from yajaw import settings
+from yajaw.settings import *
 from yajaw.utils import conversions
 
 # Classes for type hints
@@ -27,7 +27,7 @@ Custom authentication class for Personal Access Tokens
 
 class PersonalAccessTokenAuth(httpx.Auth):
     def __init__(self, token):
-        self.token = settings.JIRA_PAT
+        self.token = JIRA_PAT
 
     def auth_flow(self, request):
         request.headers["Authorization"] = f"Bearer {self.token}"
@@ -51,11 +51,11 @@ def generate_payload(
 
 
 def generate_auth() -> PersonalAccessTokenAuth:
-    return PersonalAccessTokenAuth(settings.JIRA_PAT)
+    return PersonalAccessTokenAuth(JIRA_PAT)
 
 
 def generate_url(resource: str) -> str:
-    return f"{settings.JIRA_BASE_URL}/{settings.JIRA_API_V2}/{resource}"
+    return f"{JIRA_BASE_URL}/{JIRA_API_V2}/{resource}"
 
 
 def generate_client() -> httpx.AsyncClient:
@@ -80,7 +80,7 @@ async def send_single_request(
     responses = list()
     client = generate_client()
     url = generate_url(resource=resource)
-    async with client:
+    async with client, semaphore:
         task = asyncio.create_task(
             send_request(
                 client=client, method=method, url=url, params=params, payload=payload
@@ -138,7 +138,7 @@ async def send_paginated_requests(
         )
 
         client = generate_client()
-        async with client:
+        async with client, semaphore:
             tasks = [
                 asyncio.create_task(
                     send_single_request(
@@ -205,7 +205,9 @@ def generate_paginated_attributes_list(
         attributes["params"] = params
         attributes["payload"] = payload
         if method == "GET":
-            attributes["params"] = generate_params(new_params=pagination)
+            attributes["params"] = generate_params(
+                new_params=pagination, existing_params=params
+            )
         elif method == "POST":
             attributes["payload"] = generate_payload(
                 new_content=pagination, existing_content=payload
