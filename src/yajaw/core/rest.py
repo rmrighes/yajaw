@@ -114,7 +114,7 @@ async def send_paginated_requests(
     responses.append(response)
 
     # Check result for multiple pages
-    initial_response = responses[0].json()
+    initial_response = response.json()
     start_at = initial_response["startAt"] if "startAt" in initial_response else None
     max_results = (
         initial_response["maxResults"] if "maxResults" in initial_response else None
