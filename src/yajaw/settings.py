@@ -19,4 +19,4 @@ format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=format)
 
 # TODO: Expose configuration settings for rate limit control
-semaphore = asyncio.BoundedSemaphore(50)
+semaphore = asyncio.BoundedSemaphore(200)

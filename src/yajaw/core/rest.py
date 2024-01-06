@@ -1,5 +1,6 @@
 import asyncio
 import httpx
+from functools import wraps
 from typing import TypedDict
 from yajaw.settings import *
 from yajaw.utils import conversions
@@ -26,12 +27,34 @@ Custom authentication class for Personal Access Tokens
 
 
 class PersonalAccessTokenAuth(httpx.Auth):
-    def __init__(self, token):
-        self.token = JIRA_PAT
+    def __init__(self, pat):
+        self.token = pat
 
     def auth_flow(self, request):
         request.headers["Authorization"] = f"Bearer {self.token}"
         yield request
+
+import time
+
+def retry(func):
+    async def wrapper(*args, **kwargs):
+        attempt = 1
+        tries = 10
+        delay = 0.3
+        backoff = 1.5
+        while attempt <= tries:
+            result:httpx.Response = await func(*args, **kwargs)
+            if result.status_code == httpx.codes.OK:
+                logger.info(f"status code {result.status_code} -- attemp {attempt:02d}")
+                return result
+            else:
+                logger.warning(f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds")
+                await asyncio.sleep(delay)
+                attempt += 1
+                delay *= backoff
+        logger.error(f"Unable to cmplete the request successfully.")
+        return result
+    return wrapper
 
 
 def generate_headers() -> dict[str]:
@@ -64,6 +87,7 @@ def generate_client() -> httpx.AsyncClient:
     )
 
 
+@retry
 async def send_request(
     client: httpx.AsyncClient,
     method: str,
@@ -105,7 +129,7 @@ async def send_single_request(
 async def send_paginated_requests(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
-    default_pagination = [{"startAt": 0, "maxResults": 50}]
+    default_pagination = [{"startAt": 0, "maxResults": 10}]
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,
