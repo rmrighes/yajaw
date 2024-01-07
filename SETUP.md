@@ -32,4 +32,14 @@ Attention: To completely clean the workspace, run the following command. It will
 
 ``` shell
 git clean -dxffi
-``` 
+```
+
+Run linter
+
+``` shell
+hatch run pylint $(git ls-files '*.py')
+```
+or
+``` shell
+hatch fmt
+```
