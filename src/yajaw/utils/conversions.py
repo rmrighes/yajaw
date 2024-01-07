@@ -7,15 +7,19 @@ type single_response = dict[any]
 
 def validate_responses_attribute(responses: list[httpx.Response]) -> None:
     if isinstance(responses, list):
-        if all(isinstance(response, httpx.Response) for response in responses):
-            return None
+        if len(responses) > 0:
+            if all(isinstance(response, httpx.Response) for response in responses):
+                return None
     raise exceptions.InvalidResponseException
 
 
-def process_single_nonpaginated_resource(responses: list[httpx.Response]):
+def process_single_nonpaginated_resource(responses: list[httpx.Response]) -> single_response:
     validate_responses_attribute(responses=responses)
-    consolidated_responses = responses[0].json()
-    return consolidated_responses
+    if len(responses) == 1:
+        consolidated_responses = responses[0].json()
+        return consolidated_responses
+    else:
+        raise exceptions.InvalidResponseException
 
 
 def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):

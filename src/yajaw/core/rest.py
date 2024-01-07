@@ -47,22 +47,24 @@ def retry(func):
         attempt = 1
         tries = 10
         delay = 0.3
-        backoff = 1.5
+        backoff = 1.8
         while attempt <= tries:
             result: httpx.Response = await func(*args, **kwargs)
             if type(result) == httpx.Response:
                 if result.status_code == httpx.codes.OK:
-                    logger.info(f"status code {result.status_code} -- attemp {attempt:02d}")
+                    logger.info(
+                        f"status code {result.status_code} -- attemp {attempt:02d}"
+                    )
                     return result
                 else:
                     logger.warning(
                         f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
                     )
-                    await asyncio.sleep(delay)
-                    attempt += 1
-                    delay *= backoff
             else:
                 logger.warning(f"No valid response received -- attemp {attempt:02d}")
+            await asyncio.sleep(delay)
+            attempt += 1
+            delay *= backoff
         logger.error(f"Unable to complete the request successfully.")
         return result
 
@@ -98,23 +100,27 @@ def generate_client() -> httpx.AsyncClient:
         auth=generate_auth(), headers=generate_headers(), timeout=None
     )
 
+
 def is_valid_response(response: httpx.Response) -> bool:
     if response.status_code == httpx.codes.OK:
         return True
     else:
         return False
-    
+
+
 def is_resource_not_found(response: httpx.Response) -> bool:
     if response.status_code == 404:
         return True
     else:
         return False
-    
+
+
 def is_resource_unauthorized(response: httpx.Response) -> bool:
     if response.status_code == 403:
         return True
     else:
         return False
+
 
 @retry
 async def send_request(
@@ -143,7 +149,11 @@ async def send_single_request(
         async with client, semaphore:
             task = asyncio.create_task(
                 send_request(
-                    client=client, method=method, url=url, params=params, payload=payload
+                    client=client,
+                    method=method,
+                    url=url,
+                    params=params,
+                    payload=payload,
                 )
             )
             response = await task
@@ -167,7 +177,7 @@ async def send_single_request(
 async def send_paginated_requests(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
-    default_pagination = [{"startAt": 0, "maxResults": 10}]
+    default_pagination = [{"startAt": 0, "maxResults": 20}]
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,

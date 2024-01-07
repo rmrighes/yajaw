@@ -70,6 +70,7 @@ branch = true
 parallel = true
 omit = [
   "src/yajaw/__about__.py",
+  "*/tests/*",
 ]
 
 [tool.coverage.paths]

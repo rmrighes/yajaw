@@ -23,7 +23,7 @@ async def main():
     print(f"{issue["key"]} -- {issue["fields"]["summary"]}")
     print()
     print("Resource: search/{jql}")
-    jql = "project in (ETOE, EMI, ESTT)"
+    jql = "project in (ETOE, EMI, ESTT, MLOPS)"
     issues = await jira.async_search_issues(jql=jql)
     [print(f"{issue["key"]} - {issue["fields"]["summary"]}") for issue in issues]
     print(f"There is a total of {len(issues)} issues returned by the search.")
