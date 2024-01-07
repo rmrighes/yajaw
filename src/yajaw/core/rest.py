@@ -3,6 +3,7 @@ import httpx
 from functools import wraps
 from typing import TypedDict
 from yajaw.settings import *
+from yajaw.core import exceptions
 from yajaw.utils import conversions
 
 # Classes for type hints
@@ -34,26 +35,37 @@ class PersonalAccessTokenAuth(httpx.Auth):
         request.headers["Authorization"] = f"Bearer {self.token}"
         yield request
 
-import time
+
+"""
+Decorators
+"""
+
 
 def retry(func):
+    @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
         tries = 10
         delay = 0.3
         backoff = 1.5
         while attempt <= tries:
-            result:httpx.Response = await func(*args, **kwargs)
-            if result.status_code == httpx.codes.OK:
-                logger.info(f"status code {result.status_code} -- attemp {attempt:02d}")
-                return result
+            result: httpx.Response = await func(*args, **kwargs)
+            if type(result) == httpx.Response:
+                if result.status_code == httpx.codes.OK:
+                    logger.info(f"status code {result.status_code} -- attemp {attempt:02d}")
+                    return result
+                else:
+                    logger.warning(
+                        f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
+                    )
+                    await asyncio.sleep(delay)
+                    attempt += 1
+                    delay *= backoff
             else:
-                logger.warning(f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds")
-                await asyncio.sleep(delay)
-                attempt += 1
-                delay *= backoff
-        logger.error(f"Unable to cmplete the request successfully.")
+                logger.warning(f"No valid response received -- attemp {attempt:02d}")
+        logger.error(f"Unable to complete the request successfully.")
         return result
+
     return wrapper
 
 
@@ -86,6 +98,23 @@ def generate_client() -> httpx.AsyncClient:
         auth=generate_auth(), headers=generate_headers(), timeout=None
     )
 
+def is_valid_response(response: httpx.Response) -> bool:
+    if response.status_code == httpx.codes.OK:
+        return True
+    else:
+        return False
+    
+def is_resource_not_found(response: httpx.Response) -> bool:
+    if response.status_code == 404:
+        return True
+    else:
+        return False
+    
+def is_resource_unauthorized(response: httpx.Response) -> bool:
+    if response.status_code == 403:
+        return True
+    else:
+        return False
 
 @retry
 async def send_request(
@@ -95,24 +124,33 @@ async def send_request(
     params: dict[str] = None,
     payload: dict[str] = None,
 ) -> httpx.Response:
-    return await client.request(method=method, url=url, params=params, json=payload)
+    response = await client.request(method=method, url=url, params=params, json=payload)
+    if is_valid_response(response):
+        return response
+    elif is_resource_not_found(response):
+        raise exceptions.ResourceNotFoundException
+    elif is_resource_unauthorized(response):
+        raise exceptions.ResourceNotAuthorizedException
 
 
 async def send_single_request(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
     responses = list()
-    client = generate_client()
-    url = generate_url(resource=resource)
-    async with client, semaphore:
-        task = asyncio.create_task(
-            send_request(
-                client=client, method=method, url=url, params=params, payload=payload
+    try:
+        client = generate_client()
+        url = generate_url(resource=resource)
+        async with client, semaphore:
+            task = asyncio.create_task(
+                send_request(
+                    client=client, method=method, url=url, params=params, payload=payload
+                )
             )
-        )
-        response = await task
-    responses.append(response)
-    return responses
+            response = await task
+        responses.append(response)
+        return responses
+    except exceptions.ResourceNotFoundException:
+        raise exceptions.ResourceNotFoundException
 
 
 """

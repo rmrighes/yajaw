@@ -15,7 +15,7 @@ async def async_fetch_all_projects(expand: str = None) -> list_responses:
 
 
 def fetch_all_projects(expand: str = None) -> list_responses:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coroutine = async_fetch_all_projects(expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -29,7 +29,7 @@ async def async_fetch_project(project_key: str, expand: str = None) -> single_re
 
 
 def fetch_project(project_key: str, expand: str = None) -> single_response:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coroutine = async_fetch_project(project_key=project_key, expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -48,7 +48,7 @@ async def async_fetch_projects_from_list(
 def fetch_projects_from_list(
     project_keys: list[str], expand: str = None
 ) -> list_responses:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coroutine = async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -64,7 +64,7 @@ async def async_fetch_issue(
 
 
 def fetch_issue(issue_key: str, expand: str = None) -> single_response:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coroutine = async_fetch_issue(issue_key=issue_key, expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -87,7 +87,7 @@ async def async_search_issues(
 
 
 def search_issues(jql: str, expand: str = None, fields: str = None) -> list_responses:
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coroutine = async_search_issues(jql=jql, expand=expand, fields=fields)
     return loop.run_until_complete(coroutine)
 

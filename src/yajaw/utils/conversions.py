@@ -1,5 +1,5 @@
 import httpx
-import json
+from yajaw.core import exceptions
 
 type list_responses = list[dict[any]]
 type single_response = dict[any]
@@ -9,7 +9,7 @@ def validate_responses_attribute(responses: list[httpx.Response]) -> None:
     if isinstance(responses, list):
         if all(isinstance(response, httpx.Response) for response in responses):
             return None
-    raise InvalidResponseException
+    raise exceptions.InvalidResponseException
 
 
 def process_single_nonpaginated_resource(responses: list[httpx.Response]):
@@ -34,7 +34,3 @@ def process_multiple_paginated_resources(responses: list[httpx.Response], field_
         for resource in resources[field_array]:
             consolidated_responses.append(resource)
     return consolidated_responses
-
-
-class InvalidResponseException(Exception):
-    "Response is not valid!"
