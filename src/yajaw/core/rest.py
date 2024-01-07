@@ -1,9 +1,11 @@
 import asyncio
-import httpx
 from functools import wraps
 from typing import TypedDict
-from yajaw.settings import *
+
+import httpx
+
 from yajaw.core import exceptions
+from yajaw.settings import *
 from yajaw.utils import conversions
 
 # Classes for type hints
@@ -65,7 +67,7 @@ def retry(func):
             await asyncio.sleep(delay)
             attempt += 1
             delay *= backoff
-        logger.error(f"Unable to complete the request successfully.")
+        logger.error("Unable to complete the request successfully.")
         return result
 
     return wrapper

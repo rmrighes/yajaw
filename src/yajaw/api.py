@@ -1,9 +1,9 @@
 import asyncio
+
 import httpx
 
 # 3.13? from warnings import deprecated
 from .settings import *
-
 
 #######################################
 # Auxiliary Functions

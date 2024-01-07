@@ -1,6 +1,7 @@
+import asyncio
+
 from yajaw.core import rest
 from yajaw.utils import conversions
-import asyncio
 
 type list_responses = list[dict[any]]
 type single_response = dict[any]
@@ -73,7 +74,7 @@ async def async_search_issues(
     jql: str, expand: str = None, fields: str = None
 ) -> list_responses:
     method = "POST"
-    resource = f"search"
+    resource = "search"
     content = {"jql": jql}
     field_array = "issues"
     payload = rest.generate_payload(content)

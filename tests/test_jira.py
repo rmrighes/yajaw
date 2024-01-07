@@ -1,8 +1,10 @@
+from unittest.mock import patch
+
 import httpx
 import pytest
-from unittest.mock import patch
-from yajaw.jira import *
+
 from yajaw.core import exceptions as e
+from yajaw.jira import *
 
 #########
 # MOCK!!!

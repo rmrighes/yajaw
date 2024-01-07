@@ -1,4 +1,5 @@
 import httpx
+
 from yajaw.core import exceptions
 
 type list_responses = list[dict[any]]
