@@ -7,7 +7,7 @@ def main():
 
     print("Resource: project")
     projects = jira.fetch_all_projects(expand=None)
-    [print(project["key"]) for project in projects]
+    print(* (project["key"] for project in projects), sep="\n")
     print(f"There is a total of {len(projects)} projects.")
     print()
     print("Resource: projec/{project_key}")
@@ -17,7 +17,7 @@ def main():
     print("Resource: project/{project_key} from list")
     project_keys = {"ETOE","ESTT"}
     projects = jira.fetch_projects_from_list(project_keys=project_keys)
-    [print(project["key"]) for project in projects]
+    print(* (project["key"] for project in projects), sep="\n")
     print()
     print("Resource: issue/{issue_key}")
     issue = jira.fetch_issue(issue_key="ETOE-8", expand=None)
@@ -26,7 +26,7 @@ def main():
     print("Resource: search/{jql}")
     jql = "project in (ETOE, EMI, ESTT, MLOPS)"
     issues = jira.search_issues(jql=jql)
-    [print(issue["key"]) for issue in issues]
+    print(* (f"{issue["key"]} - {issue["fields"]["summary"]}" for issue in issues), sep="\n")
     print(f"There is a total of {len(issues)} issues returned by the search.")
     print()
 
