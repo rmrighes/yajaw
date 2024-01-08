@@ -28,7 +28,7 @@ from yajaw.jira import fetch_project
 
 
 def fetch_single_mock_valid_issue() -> httpx.Response:
-    """Auxiliry function to generate a valid issue as httpx.Response to be 
+    """Auxiliry function to generate a valid issue as httpx.Response to be
     used in different tests.
     """
     return httpx.Response(
@@ -37,7 +37,7 @@ def fetch_single_mock_valid_issue() -> httpx.Response:
 
 
 def fetch_single_mock_not_found_issue() -> httpx.Response:
-    """Auxiliary function to generate a resource not found httpx.Response 
+    """Auxiliary function to generate a resource not found httpx.Response
     to be used in different tests.
     """
     return httpx.Response(status_code=404, headers=None, request=None, json={})

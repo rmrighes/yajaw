@@ -4,17 +4,17 @@ from typing import TypedDict
 
 import httpx
 
+import yajaw
 from yajaw.core import exceptions
 from yajaw.utils import conversions
-from yajaw.core.settings import CONFIG
 
-LOGGER = CONFIG["log"]["logger"]
-SEMAPHORE = CONFIG["concurrency"]["semaphore"]
-JIRA_PAT = CONFIG["jira"]["token"]
-JIRA_BASE_URL = CONFIG["jira"]["base_url"]
-SERVER_API = CONFIG["jira"]["server_api_v2"]
-AGILE_API = CONFIG["jira"]["agile_api_v1"]
-GREENHOPPER_API = CONFIG["jira"]["greenhopper_api"]
+LOGGER = yajaw.CONFIG["log"]["logger"]
+SEMAPHORE = yajaw.CONFIG["concurrency"]["semaphore"]
+JIRA_PAT = yajaw.CONFIG["jira"]["token"]
+JIRA_BASE_URL = yajaw.CONFIG["jira"]["base_url"]
+SERVER_API = yajaw.CONFIG["jira"]["server_api_v2"]
+AGILE_API = yajaw.CONFIG["jira"]["agile_api_v1"]
+GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
 
 
 # Classes for type hints
