@@ -3,7 +3,7 @@ import asyncio
 import httpx
 
 # 3.13? from warnings import deprecated
-from .settings import *
+from .core.settings import *
 
 #######################################
 # Auxiliary Functions

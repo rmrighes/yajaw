@@ -5,8 +5,17 @@ from typing import TypedDict
 import httpx
 
 from yajaw.core import exceptions
-from yajaw.settings import *
 from yajaw.utils import conversions
+from yajaw.core.settings import CONFIG
+
+LOGGER = CONFIG["log"]["logger"]
+SEMAPHORE = CONFIG["concurrency"]["semaphore"]
+JIRA_PAT = CONFIG["jira"]["pat"]
+JIRA_BASE_URL = CONFIG["jira"]["base_url"]
+SERVER_API = CONFIG["jira"]["server_api_v2"]
+AGILE_API = CONFIG["jira"]["agile_api_v1"]
+GREENHOPPER_API = CONFIG["jira"]["greenhopper_api"]
+
 
 # Classes for type hints
 
@@ -54,20 +63,20 @@ def retry(func):
             result: httpx.Response = await func(*args, **kwargs)
             if type(result) == httpx.Response:
                 if result.status_code == httpx.codes.OK:
-                    logger.info(
+                    LOGGER.info(
                         f"status code {result.status_code} -- attemp {attempt:02d}"
                     )
                     return result
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
                     )
             else:
-                logger.warning(f"No valid response received -- attemp {attempt:02d}")
+                LOGGER.warning(f"No valid response received -- attemp {attempt:02d}")
             await asyncio.sleep(delay)
             attempt += 1
             delay *= backoff
-        logger.error("Unable to complete the request successfully.")
+        LOGGER.error("Unable to complete the request successfully.")
         return result
 
     return wrapper
@@ -94,7 +103,7 @@ def generate_auth() -> PersonalAccessTokenAuth:
 
 
 def generate_url(resource: str) -> str:
-    return f"{JIRA_BASE_URL}/{JIRA_API_V2}/{resource}"
+    return f"{JIRA_BASE_URL}/{SERVER_API}/{resource}"
 
 
 def generate_client() -> httpx.AsyncClient:
@@ -148,7 +157,7 @@ async def send_single_request(
     try:
         client = generate_client()
         url = generate_url(resource=resource)
-        async with client, semaphore:
+        async with client, SEMAPHORE:
             task = asyncio.create_task(
                 send_request(
                     client=client,
@@ -212,7 +221,7 @@ async def send_paginated_requests(
         )
 
         client = generate_client()
-        async with client, semaphore:
+        async with client, SEMAPHORE:
             tasks = [
                 asyncio.create_task(
                     send_single_request(

@@ -1,3 +1,5 @@
+""" Module responsible for the definition of custom exceptions."""
+
 class ResourceNotFoundException(Exception):
     "Resource not found!"
 
