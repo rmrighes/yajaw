@@ -26,8 +26,7 @@ def process_single_nonpaginated_resource(responses: list[httpx.Response]) -> sin
     if len(responses) == 1:
         consolidated_responses = responses[0].json()
         return consolidated_responses
-    else:
-        raise exceptions.InvalidResponseException
+    raise exceptions.InvalidResponseException
 
 
 def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):
@@ -49,9 +48,9 @@ def process_multiple_paginated_resources(responses: list[httpx.Response], field_
     multiple resources are part of a single response.
     """
     validate_responses_attribute(responses=responses)
-    consolidated_responses = list()
-    for single_response in responses:
-        resources = single_response.json()
+    consolidated_responses = []
+    for one_response in responses:
+        resources = one_response.json()
         for resource in resources[field_array]:
             consolidated_responses.append(resource)
     return consolidated_responses
