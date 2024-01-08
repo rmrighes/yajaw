@@ -10,7 +10,7 @@ from yajaw.core.settings import CONFIG
 
 LOGGER = CONFIG["log"]["logger"]
 SEMAPHORE = CONFIG["concurrency"]["semaphore"]
-JIRA_PAT = CONFIG["jira"]["pat"]
+JIRA_PAT = CONFIG["jira"]["token"]
 JIRA_BASE_URL = CONFIG["jira"]["base_url"]
 SERVER_API = CONFIG["jira"]["server_api_v2"]
 AGILE_API = CONFIG["jira"]["agile_api_v1"]

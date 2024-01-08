@@ -1,0 +1,13 @@
+[jira]
+token = "CHANGE--Insert-PAT"
+base_url = "CHANGE--https://my-jira-domain.com"
+server_api_v2 = "rest/api/2"
+agile_api_v1 = "rest/agile/1.0"
+greenhopper_api = "rest/greenhopper/1.0"
+
+[log]
+level = "INFO"
+msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+[concurrency]
+semaphore_limit = 100
