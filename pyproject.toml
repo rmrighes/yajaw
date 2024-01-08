@@ -7,7 +7,7 @@ name = "yajaw"
 dynamic = ["version"]
 description = 'Yet Another Jira API Wrapper'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,16 +16,12 @@ authors = [
 classifiers = [
   "Development Status :: 1 - Planning",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "asyncio",
-  "httpx",
-  "python-dotenv"
+  "httpx"
 ]
 
 [project.urls]
