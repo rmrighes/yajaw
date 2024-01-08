@@ -33,9 +33,7 @@ class ClientInfo(TypedDict):
     auth: tuple[str]
 
 
-"""
-Custom authentication class for Personal Access Tokens
-"""
+# Custom authentication class for Personal Access Tokens
 
 
 class PersonalAccessTokenAuth(httpx.Auth):
@@ -47,9 +45,7 @@ class PersonalAccessTokenAuth(httpx.Auth):
         yield request
 
 
-"""
-Decorators
-"""
+# Decorators
 
 
 def retry(func):
@@ -61,7 +57,7 @@ def retry(func):
         backoff = 1.8
         while attempt <= tries:
             result: httpx.Response = await func(*args, **kwargs)
-            if type(result) == httpx.Response:
+            if isinstance(result, httpx.Response):
                 if result.status_code == httpx.codes.OK:
                     LOGGER.info(
                         f"status code {result.status_code} -- attemp {attempt:02d}"
@@ -87,14 +83,18 @@ def generate_headers() -> dict[str]:
 
 
 def generate_params(
-    new_params: dict[str], existing_params: dict[str] = dict()
+    new_params: dict[str], existing_params: dict[str] = None
 ) -> dict[str]:
+    if existing_params is None:
+        existing_params = {}
     return existing_params | new_params
 
 
 def generate_payload(
-    new_content: dict[str], existing_content: dict[str] = dict()
+    new_content: dict[str], existing_content: dict[str] = None
 ) -> dict[str]:
+    if existing_content is None:
+        existing_content = {}
     return existing_content | new_content
 
 
@@ -153,7 +153,7 @@ async def send_request(
 async def send_single_request(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
-    responses = list()
+    responses = []
     try:
         client = generate_client()
         url = generate_url(resource=resource)
@@ -174,15 +174,13 @@ async def send_single_request(
         raise exceptions.ResourceNotFoundException
 
 
-"""
-1. Send a single request and get the response
-2. Evaluate if there are additional pages to be retrieved
-3. Return the list of requests if there are no additional pages
-4. Determine the list of pages to be requested
-5. Generate a list of attributes for additional requests
-6. Concurrently send the requests based on the list of attributes
-7. Update the list of responses and return it
-"""
+# 1. Send a single request and get the response
+# 2. Evaluate if there are additional pages to be retrieved
+# 3. Return the list of requests if there are no additional pages
+# 4. Determine the list of pages to be requested
+# 5. Generate a list of attributes for additional requests
+# 6. Concurrently send the requests based on the list of attributes
+# 7. Update the list of responses and return it
 
 
 async def send_paginated_requests(
@@ -234,13 +232,14 @@ async def send_paginated_requests(
                 for attributes in attributes_list
             ]
             paginated_responses = await asyncio.gather(*tasks)
-        [responses.extend(response) for response in paginated_responses]
+        for response in paginated_responses:
+            responses.extend(response)
 
     return responses
 
 
 def fetch_paginated_attributes(response: httpx.Response) -> dict:
-    paginated_attributes = dict()
+    paginated_attributes = {}
     paginated_attributes["start_at"] = (
         response["startAt"] if "startAt" in response else None
     )
@@ -280,9 +279,9 @@ def generate_paginated_attributes_list(
     params: dict[str],
     payload: dict[str],
 ) -> list[dict]:
-    attributes_list = list()
+    attributes_list = []
     for pagination in pagination_list:
-        attributes = dict()
+        attributes = {}
         attributes["method"] = method
         attributes["resource"] = resource
         attributes["params"] = params
