@@ -1,9 +1,11 @@
+"""Module responsible for serving as example of async functions."""
 import asyncio
 
 from yajaw import jira
 
 
 async def main():
+    """Main function used to execute the example."""
 
     print("Resource: project")
     projects = await jira.async_fetch_all_projects(expand=None)

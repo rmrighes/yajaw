@@ -1,7 +1,9 @@
+"""Module responsible for serving as example of sync functions."""
 from yajaw import jira
 
 
 def main():
+    """Main function used to execute the example."""
 
     print("Resource: project")
     projects = jira.fetch_all_projects(expand=None)
