@@ -71,12 +71,12 @@ def fetch_issue(issue_key: str, expand: str = None) -> single_response:
 
 
 async def async_search_issues(
-    jql: str, expand: str = None, fields: str = None
+    jql: str, expand: str = None, field: str = None
 ) -> list_responses:
     method = "POST"
     resource = "search"
     content = {"jql": jql}
-    field_array = "issues"
+    field_array = field
     payload = rest.generate_payload(content)
     response = await rest.send_paginated_requests(
         method=method, resource=resource, payload=payload
@@ -87,9 +87,9 @@ async def async_search_issues(
     return issues
 
 
-def search_issues(jql: str, expand: str = None, fields: str = None) -> list_responses:
+def search_issues(jql: str, expand: str = None, field: str = None) -> list_responses:
     loop = asyncio.new_event_loop()
-    coroutine = async_search_issues(jql=jql, expand=expand, fields=fields)
+    coroutine = async_search_issues(jql=jql, expand=expand, field=field)
     return loop.run_until_complete(coroutine)
 
 
