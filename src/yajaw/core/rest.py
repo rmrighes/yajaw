@@ -63,11 +63,10 @@ def retry(func):
                         f"status code {result.status_code} -- attemp {attempt:02d}"
                     )
                     return result
-                else:
-                    LOGGER.warning(
-                        f"status code {result.status_code} -- "\
-                        f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
-                    )
+                LOGGER.warning(
+                    f"status code {result.status_code} -- "
+                    f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
+                )
             else:
                 LOGGER.warning(f"No valid response received -- attemp {attempt:02d}")
             await asyncio.sleep(delay)
@@ -114,24 +113,15 @@ def generate_client() -> httpx.AsyncClient:
 
 
 def is_valid_response(response: httpx.Response) -> bool:
-    if response.status_code == httpx.codes.OK:
-        return True
-    else:
-        return False
+    return response.status_code == httpx.codes.OK
 
 
 def is_resource_not_found(response: httpx.Response) -> bool:
-    if response.status_code == 404:
-        return True
-    else:
-        return False
+    return response.status_code == 404
 
 
 def is_resource_unauthorized(response: httpx.Response) -> bool:
-    if response.status_code == 403:
-        return True
-    else:
-        return False
+    return response.status_code == 403
 
 
 @retry
@@ -145,9 +135,9 @@ async def send_request(
     response = await client.request(method=method, url=url, params=params, json=payload)
     if is_valid_response(response):
         return response
-    elif is_resource_not_found(response):
+    if is_resource_not_found(response):
         raise exceptions.ResourceNotFoundException
-    elif is_resource_unauthorized(response):
+    if is_resource_unauthorized(response):
         raise exceptions.ResourceNotAuthorizedException
 
 
@@ -171,8 +161,8 @@ async def send_single_request(
             response = await task
         responses.append(response)
         return responses
-    except exceptions.ResourceNotFoundException:
-        raise exceptions.ResourceNotFoundException
+    except exceptions.ResourceNotFoundException as e:
+        raise exceptions.ResourceNotFoundException from e
 
 
 # 1. Send a single request and get the response
