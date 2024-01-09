@@ -65,7 +65,8 @@ def retry(func):
                     return result
                 else:
                     LOGGER.warning(
-                        f"status code {result.status_code} -- attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
+                        f"status code {result.status_code} -- "\
+                        f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
                     )
             else:
                 LOGGER.warning(f"No valid response received -- attemp {attempt:02d}")
