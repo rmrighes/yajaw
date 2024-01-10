@@ -11,8 +11,7 @@ def test_validate_responses_attribute_receives_list_of_response_objs():
     objects.
     """
     responses = [
-        httpx.Response(status_code=200, headers=None, request=None, json=None)
-        for _ in range(3)
+        httpx.Response(status_code=200, headers=None, request=None, json=None) for _ in range(3)
     ]
     assert conversions.validate_responses_attribute(responses=responses) is None
 
@@ -22,14 +21,14 @@ def test_validate_responses_attribute_receives_not_list():
     of httpx.Response objects.
     """
     responses = "String"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
 def test_validate_responses_attribute_receives_empty_list():
     """Test validate_responses_attribute() with empty list."""
     responses = []
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -38,7 +37,7 @@ def test_validate_responses_attribute_receives_wrong_list_type():
     than httpx.Response objects.
     """
     responses = ["First", "Second", "Third"]
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -47,11 +46,10 @@ def test_validate_responses_attribute_receives_list_both_valid_invalid():
     httpx.Response objects and other types.
     """
     responses = [
-        httpx.Response(status_code=200, headers=None, request=None, json=None)
-        for _ in range(3)
+        httpx.Response(status_code=200, headers=None, request=None, json=None) for _ in range(3)
     ]
     responses.append("String")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -61,9 +59,7 @@ def test_process_single_nonpaginated_resource_receives_list_with_single_response
     """
     responses = []
     responses.append(
-        httpx.Response(
-            status_code=200, headers=None, request=None, json={"key": "value"}
-        )
+        httpx.Response(status_code=200, headers=None, request=None, json={"key": "value"})
     )
     result = conversions.process_single_nonpaginated_resource(responses=responses)
     assert isinstance(result, dict)
@@ -75,12 +71,10 @@ def test_process_single_nonpaginated_resource_receives_list_with_multiple_respon
     httpx.Response objects.
     """
     responses = [
-        httpx.Response(
-            status_code=200, headers=None, request=None, json={"key": "value"}
-        )
+        httpx.Response(status_code=200, headers=None, request=None, json={"key": "value"})
         for _ in range(3)
     ]
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -90,7 +84,7 @@ def test_process_single_nonpaginated_resource_receives_wrong_list_type():
     """
     responses = []
     responses.append("ABC")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -99,7 +93,7 @@ def test_process_single_nonpaginated_resource_receives_wrong_type():
     a list of httpx.Response objects.
     """
     responses = "ABC"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -109,9 +103,7 @@ def test_process_multiple_nonpaginated_resource_receives_list_with_single_respon
     """
     responses = []
     responses.append(
-        httpx.Response(
-            status_code=200, headers=None, request=None, json={"key": "value"}
-        )
+        httpx.Response(status_code=200, headers=None, request=None, json={"key": "value"})
     )
     result = conversions.process_multiple_nonpaginated_resources(responses=responses)
     assert isinstance(result, list)
@@ -124,9 +116,7 @@ def test_process_multiple_nonpaginated_resources_receives_list_with_multiple_res
     httpx.Response objects.
     """
     responses = [
-        httpx.Response(
-            status_code=200, headers=None, request=None, json={"key": "value"}
-        )
+        httpx.Response(status_code=200, headers=None, request=None, json={"key": "value"})
         for _ in range(3)
     ]
     result = conversions.process_multiple_nonpaginated_resources(responses=responses)
@@ -141,7 +131,7 @@ def test_process_multiple_nonpaginated_resources_receives_wrong_list_type():
     """
     responses = []
     responses.append("ABC")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_multiple_nonpaginated_resources(responses=responses)
 
 
@@ -150,5 +140,5 @@ def test_process_multiple_nonpaginated_resources_receives_wrong_type():
     a list of httpx.Response objects.
     """
     responses = "ABC"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_multiple_nonpaginated_resources(responses=responses)

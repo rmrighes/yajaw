@@ -1,10 +1,17 @@
 """ Module responsible for the definition of custom exceptions."""
 
-class ResourceNotFoundException(Exception):
-    "Resource not found!"
 
-class ResourceNotAuthorizedException(Exception):
-    "Resource not authorized!"
+class ResourceUnauthorizedError(Exception):
+    "Resource unauthorized"
 
-class InvalidResponseException(Exception):
+
+class ResourceForbiddenError(Exception):
+    "Resource forbidden"
+
+
+class ResourceNotFoundError(Exception):
+    "Resource not found"
+
+
+class InvalidResponseError(Exception):
     "Response is not valid!"
