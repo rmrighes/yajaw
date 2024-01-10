@@ -79,7 +79,7 @@ def generate_headers() -> dict[str]:
 
 
 def generate_params(
-    new_params: dict[str], existing_params: dict[str] = None
+    new_params: dict[str], existing_params: dict[str] | None = None
 ) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
@@ -88,7 +88,7 @@ def generate_params(
 
 
 def generate_payload(
-    new_content: dict[str], existing_content: dict[str] = None
+    new_content: dict[str], existing_content: dict[str] | None = None
 ) -> dict[str]:
     """Function responsible for generating the payload info for HTTP requests."""
     if existing_content is None:
@@ -138,8 +138,8 @@ async def send_request(
     client: httpx.AsyncClient,
     method: str,
     url: str,
-    params: dict[str] = None,
-    payload: dict[str] = None,
+    params: dict[str] | None = None,
+    payload: dict[str] | None = None,
 ) -> httpx.Response:
     """Function responsible for making a low level HTTP request."""
     response = await client.request(method=method, url=url, params=params, json=payload)
@@ -155,7 +155,10 @@ async def send_request(
 
 
 async def send_single_request(
-    method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
+    method: str,
+    resource: str,
+    params: dict[str] | None = None,
+    payload: dict[str] | None = None,
 ) -> list[httpx.Response]:
     """Function with added logic to request a single HTTP call and basic process of its return."""
     responses = []
@@ -201,7 +204,10 @@ async def send_single_request(
 
 
 async def send_paginated_requests(
-    method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
+    method: str,
+    resource: str,
+    params: dict[str] | None = None,
+    payload: dict[str] | None = None,
 ) -> list[httpx.Response]:
     """Function with added logic request a paginated HTTP call and basic process of its return."""
     default_pagination = [{"startAt": 0, "maxResults": 20}]
@@ -287,11 +293,10 @@ def generate_pages_list(paginated_attributes: dict) -> list[dict]:
             int(paginated_attributes["total"] / paginated_attributes["max_results"])
         )
     ]
-    pagination_list = [
+    return [
         {"startAt": page, "maxResults": paginated_attributes["max_results"]}
         for page in page_list
     ]
-    return pagination_list
 
 
 def generate_paginated_attributes_list(
