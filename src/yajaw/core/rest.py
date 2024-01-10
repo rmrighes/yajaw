@@ -1,11 +1,10 @@
 import asyncio
 from functools import wraps
-from typing import TypedDict
 
 import httpx
 
 import yajaw
-from yajaw.core import exceptions
+from yajaw.core import exceptions, HttpStatusCode
 from yajaw.utils import conversions
 
 LOGGER = yajaw.CONFIG["log"]["logger"]
@@ -20,17 +19,17 @@ GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
 # Classes for type hints
 
 
-class PaginationInfo(TypedDict):
-    startAt: int
-    maxResults: int
-    total: int
+# class PaginationInfo(TypedDict):
+#    startAt: int
+#    maxResults: int
+#    total: int
 
 
-class ClientInfo(TypedDict):
-    base_url: str
-    headers: dict[str]
-    params: dict[str]
-    auth: tuple[str]
+# class ClientInfo(TypedDict):
+#    base_url: str
+#    headers: dict[str]
+#    params: dict[str]
+#   auth: tuple[str]
 
 
 # Custom authentication class for Personal Access Tokens
@@ -53,27 +52,29 @@ def retry(func):
     async def wrapper(*args, **kwargs):
         attempt = 1
         tries = 10
-        delay = 0.3
+        delay = 0.1
         backoff = 1.8
         while attempt <= tries:
-            result: httpx.Response = await func(*args, **kwargs)
-            if isinstance(result, httpx.Response):
-                if result.status_code == httpx.codes.OK:
-                    LOGGER.info(
-                        f"status code {result.status_code} -- attemp {attempt:02d}"
+            try:
+                result: httpx.Response = await func(*args, **kwargs)
+                if isinstance(result, httpx.Response):
+                    if result.status_code == httpx.codes.OK:
+                        LOGGER.debug(
+                            f"status code {result.status_code} -- attemp {attempt:02d}"
+                        )
+                        return result
+                    LOGGER.debug(
+                        f"status code {result.status_code} -- "
+                        f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
                     )
-                    return result
-                LOGGER.warning(
-                    f"status code {result.status_code} -- "
-                    f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
-                )
-            else:
-                LOGGER.warning(f"No valid response received -- attemp {attempt:02d}")
-            await asyncio.sleep(delay)
-            attempt += 1
-            delay *= backoff
+            except httpx.ConnectError:
+                LOGGER.debug(f"No valid response received -- attemp {attempt:02d}")
+            finally:
+                await asyncio.sleep(delay)
+                attempt += 1
+                delay *= backoff
         LOGGER.error("Unable to complete the request successfully.")
-        return result
+        # return result
 
     return wrapper
 
@@ -116,12 +117,16 @@ def is_valid_response(response: httpx.Response) -> bool:
     return response.status_code == httpx.codes.OK
 
 
-def is_resource_not_found(response: httpx.Response) -> bool:
-    return response.status_code == 404
-
-
 def is_resource_unauthorized(response: httpx.Response) -> bool:
-    return response.status_code == 403
+    return response.status_code == HttpStatusCode.UNAUTHORIZED
+
+
+def is_resource_forbideen(response: httpx.Response) -> bool:
+    return response.status_code == HttpStatusCode.FORBIDDEN
+
+
+def is_resource_not_found(response: httpx.Response) -> bool:
+    return response.status_code == HttpStatusCode.NOT_FOUND
 
 
 @retry
@@ -135,10 +140,13 @@ async def send_request(
     response = await client.request(method=method, url=url, params=params, json=payload)
     if is_valid_response(response):
         return response
-    if is_resource_not_found(response):
-        raise exceptions.ResourceNotFoundException
     if is_resource_unauthorized(response):
-        raise exceptions.ResourceNotAuthorizedException
+        raise exceptions.ResourceUnauthorizedError
+    if is_resource_forbideen(response):
+        raise exceptions.ResourceForbiddenError
+    if is_resource_not_found(response):
+        raise exceptions.ResourceNotFoundError
+    return None
 
 
 async def send_single_request(
@@ -159,10 +167,19 @@ async def send_single_request(
                 )
             )
             response = await task
+        LOGGER.info(
+            f"{response.status_code} -- {response.request.method} {response.request.url}"
+        )
+        if payload is not None:
+            LOGGER.info(f"{payload}")
         responses.append(response)
-        return responses
-    except exceptions.ResourceNotFoundException as e:
-        raise exceptions.ResourceNotFoundException from e
+    except exceptions.ResourceUnauthorizedError as e:
+        raise exceptions.ResourceUnauthorizedError from e
+    except exceptions.ResourceForbiddenError as e:
+        raise exceptions.ResourceForbiddenError from e
+    except exceptions.ResourceNotFoundError as e:
+        raise exceptions.ResourceNotFoundError from e
+    return responses
 
 
 # 1. Send a single request and get the response
@@ -177,7 +194,7 @@ async def send_single_request(
 async def send_paginated_requests(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
-    default_pagination = [{"startAt": 0, "maxResults": 20}]
+    default_pagination = [{"startAt": 0, "maxResults": 10}]
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,

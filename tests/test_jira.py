@@ -32,7 +32,7 @@ def fetch_single_mock_valid_issue() -> httpx.Response:
     used in different tests.
     """
     return httpx.Response(
-        status_code=200, headers=None, request=None, json={"key": "VALID"}
+        status_code=200, headers=None, request=httpx.Request("GET", "https://example.org"), json={"key": "VALID"}
     )
 
 
@@ -60,5 +60,5 @@ def test_fetch_single_not_found_issue(mock_rest_request):
     """
     mock_response = fetch_single_mock_not_found_issue()
     mock_rest_request.return_value = mock_response
-    with pytest.raises(e.ResourceNotFoundException):
+    with pytest.raises(e.ResourceNotFoundError):
         fetch_project("INVALID")

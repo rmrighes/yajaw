@@ -22,14 +22,14 @@ def test_validate_responses_attribute_receives_not_list():
     of httpx.Response objects.
     """
     responses = "String"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
 def test_validate_responses_attribute_receives_empty_list():
     """Test validate_responses_attribute() with empty list."""
     responses = []
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -38,7 +38,7 @@ def test_validate_responses_attribute_receives_wrong_list_type():
     than httpx.Response objects.
     """
     responses = ["First", "Second", "Third"]
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -51,7 +51,7 @@ def test_validate_responses_attribute_receives_list_both_valid_invalid():
         for _ in range(3)
     ]
     responses.append("String")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.validate_responses_attribute(responses=responses)
 
 
@@ -80,7 +80,7 @@ def test_process_single_nonpaginated_resource_receives_list_with_multiple_respon
         )
         for _ in range(3)
     ]
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -90,7 +90,7 @@ def test_process_single_nonpaginated_resource_receives_wrong_list_type():
     """
     responses = []
     responses.append("ABC")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -99,7 +99,7 @@ def test_process_single_nonpaginated_resource_receives_wrong_type():
     a list of httpx.Response objects.
     """
     responses = "ABC"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_single_nonpaginated_resource(responses=responses)
 
 
@@ -141,7 +141,7 @@ def test_process_multiple_nonpaginated_resources_receives_wrong_list_type():
     """
     responses = []
     responses.append("ABC")
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_multiple_nonpaginated_resources(responses=responses)
 
 
@@ -150,5 +150,5 @@ def test_process_multiple_nonpaginated_resources_receives_wrong_type():
     a list of httpx.Response objects.
     """
     responses = "ABC"
-    with pytest.raises(e.InvalidResponseException):
+    with pytest.raises(e.InvalidResponseError):
         conversions.process_multiple_nonpaginated_resources(responses=responses)

@@ -16,8 +16,7 @@ def load_settings_from_file() -> dict:
     """Load configuration settings from file"""
     fname = "yajaw.toml"
     with open(Path.home() / ".yajaw" / fname, "rb") as toml:
-        config = tomllib.load(toml)
-    return config
+        return tomllib.load(toml)
 
 
 def define_logger(config: dict):

@@ -1,4 +1,4 @@
-""" Module responsible for the externally accessible functions wrapping 
+""" Module responsible for the externally accessible functions wrapping
 the Jira API."""
 import asyncio
 
