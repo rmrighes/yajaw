@@ -3,8 +3,8 @@ import httpx
 
 from yajaw.core import exceptions
 
-type list_responses = list[dict[any]]
-type single_response = dict[any]
+type ListResponses = list[dict[any]]
+type SingleResponse = dict[any]
 
 
 def validate_responses_attribute(responses: list[httpx.Response]) -> None:
@@ -18,7 +18,7 @@ def validate_responses_attribute(responses: list[httpx.Response]) -> None:
 
 def process_single_nonpaginated_resource(
     responses: list[httpx.Response],
-) -> single_response:
+) -> SingleResponse:
     """Ensure that an original list of a single httpx.Response object is
     converted into a dictionary, as it is the expected format for a
     single response with a single resource.
@@ -30,7 +30,9 @@ def process_single_nonpaginated_resource(
     raise exceptions.InvalidResponseError
 
 
-def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):
+def process_multiple_nonpaginated_resources(
+    responses: list[httpx.Response],
+) -> ListResponses:
     """Ensure that an original list of multiple httpx.Response objects is
     converted into a list of dictionaries, as it is the expected format for
     a single response with multiple resources.
@@ -44,7 +46,7 @@ def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):
 
 def process_multiple_paginated_resources(
     responses: list[httpx.Response], field_array: str
-):
+) -> ListResponses:
     """Ensure that an original list of multiple httpx.Response objects is
     converted into a list of dictionaries, as it is the expected format for
     a single response with multiple resources. It flattens the response if

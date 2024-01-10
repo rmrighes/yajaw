@@ -1,3 +1,4 @@
+"""Module responsible for lower level HTTP requests."""
 import asyncio
 from functools import wraps
 from http import HTTPStatus
@@ -21,6 +22,8 @@ GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
 
 
 class PersonalAccessTokenAuth(httpx.Auth):
+    """Class used for Personal Access Token auth in httpx."""
+
     def __init__(self, pat):
         self.token = pat
 
@@ -33,6 +36,8 @@ class PersonalAccessTokenAuth(httpx.Auth):
 
 
 def retry(func):
+    """Decorator function with the retry logic for HTTP requests."""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
@@ -65,12 +70,14 @@ def retry(func):
 
 
 def generate_headers() -> dict[str]:
+    """Function responsible for generating the headers info for HTTP requests."""
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
 def generate_params(
     new_params: dict[str], existing_params: dict[str] = None
 ) -> dict[str]:
+    """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
     return existing_params | new_params
@@ -79,38 +86,46 @@ def generate_params(
 def generate_payload(
     new_content: dict[str], existing_content: dict[str] = None
 ) -> dict[str]:
+    """Function responsible for generating the payload info for HTTP requests."""
     if existing_content is None:
         existing_content = {}
     return existing_content | new_content
 
 
 def generate_auth() -> PersonalAccessTokenAuth:
+    """Function responsible for generating the authentication info for HTTP requests."""
     return PersonalAccessTokenAuth(JIRA_PAT)
 
 
 def generate_url(resource: str) -> str:
+    """Function responsible for generating the url info for HTTP requests."""
     return f"{JIRA_BASE_URL}/{SERVER_API}/{resource}"
 
 
 def generate_client() -> httpx.AsyncClient:
+    """Function responsible for generating the client used in the context for HTTP requests."""
     return httpx.AsyncClient(
         auth=generate_auth(), headers=generate_headers(), timeout=None
     )
 
 
 def is_valid_response(response: httpx.Response) -> bool:
+    """Function responsible for confirming if a HTTP response is 2xx."""
     return response.status_code == httpx.codes.OK
 
 
 def is_resource_unauthorized(response: httpx.Response) -> bool:
+    """Function responsible for confirming if a HTTP response is 401."""
     return response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def is_resource_forbideen(response: httpx.Response) -> bool:
+    """Function responsible for confirming if a HTTP response is 403."""
     return response.status_code == HTTPStatus.FORBIDDEN
 
 
 def is_resource_not_found(response: httpx.Response) -> bool:
+    """Function responsible for confirming if a HTTP response is 404."""
     return response.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -122,6 +137,7 @@ async def send_request(
     params: dict[str] = None,
     payload: dict[str] = None,
 ) -> httpx.Response:
+    """Function responsible for making a low level HTTP request."""
     response = await client.request(method=method, url=url, params=params, json=payload)
     if is_valid_response(response):
         return response
@@ -137,6 +153,7 @@ async def send_request(
 async def send_single_request(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
+    """Function with added logic to request a single HTTP call and basic process of its return."""
     responses = []
     try:
         client = generate_client()
@@ -179,6 +196,7 @@ async def send_single_request(
 async def send_paginated_requests(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
+    """Function with added logic request a paginated HTTP call and basic process of its return."""
     default_pagination = [{"startAt": 0, "maxResults": 10}]
 
     attributes_list = generate_paginated_attributes_list(
@@ -232,6 +250,8 @@ async def send_paginated_requests(
 
 
 def fetch_paginated_attributes(response: httpx.Response) -> dict:
+    """Function that determines the attributes needed for a paginated HTTP request."""
+
     paginated_attributes = {}
     paginated_attributes["start_at"] = (
         response["startAt"] if "startAt" in response else None
@@ -244,6 +264,7 @@ def fetch_paginated_attributes(response: httpx.Response) -> dict:
 
 
 def is_pagination_required(paginated_attributes: dict) -> bool:
+    """Function that checks if pagination is required."""
     start_at = paginated_attributes["start_at"]
     max_results = paginated_attributes["max_results"]
     total = paginated_attributes["total"]
@@ -251,6 +272,7 @@ def is_pagination_required(paginated_attributes: dict) -> bool:
 
 
 def generate_pages_list(paginated_attributes: dict) -> list[dict]:
+    """Function that generates the list of attributes to retrieve all pages."""
     paginated_attributes["start_at"] = paginated_attributes["max_results"]
     page_list = [
         paginated_attributes["start_at"] + i * paginated_attributes["max_results"]
@@ -272,6 +294,8 @@ def generate_paginated_attributes_list(
     params: dict[str],
     payload: dict[str],
 ) -> list[dict]:
+    """Function that processes the pagination attributes list and returns
+    the right info based on HTTP method."""
     attributes_list = []
     for pagination in pagination_list:
         attributes = {}
