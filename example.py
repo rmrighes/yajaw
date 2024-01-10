@@ -78,7 +78,7 @@ def sync_main():
         issues = jira.search_issues(jql=jql, expand={"expand": "description"}, field="issues")
         my_logger.info("There is a total of %i issues returned by the search.\n", len(issues))
     except exceptions.InvalidResponseError:
-        my_logger.info("An error occurrend.")
+        my_logger.info("Exiting without result - a valid response was never received.")
 
 
 if __name__ == "__main__":

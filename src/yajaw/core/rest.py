@@ -51,29 +51,37 @@ def retry(func):
                 if isinstance(result, httpx.Response):
                     if result.status_code == httpx.codes.OK:
                         LOGGER.debug(
-                            "status code %d -- attempt %02d",
+                            "Response: status code %d -- attempt %02d -- sleeping for %.2f seconds",
                             result.status_code,
                             attempt,
+                            delay,
                         )
                         return result
                     LOGGER.warning(
-                        "status code %d -- attempt %02d -- sleeping for %.2f seconds",
+                        "Response: status code %d -- attempt %02d -- sleeping for %.2f seconds",
                         result.status_code,
                         attempt,
                         delay,
                     )
                 else:
-                    LOGGER.warning("not a httpx.Response")
+                    LOGGER.warning(
+                        "Response: object other than httpx.Response -- attempt %02d -- sleeping for %.2f seconds",
+                        attempt,
+                        delay,
+                    )
             except httpx.ConnectError:
                 LOGGER.warning(
-                    "No valid response received (httpx.ConnectError) -- attempt %02d",
+                    "Response: httpx.ConnectError -- attempt %02d -- sleeping for %.2f seconds",
                     attempt,
+                    delay,
                 )
             finally:
                 await asyncio.sleep(delay)
                 attempt += 1
                 delay *= backoff
-        LOGGER.error("Unable to complete the request successfully.")
+        LOGGER.error(
+            "Unable to complete the request successfully after attempt %02d.", (attempt-1)
+        )
         raise exceptions.InvalidResponseError
 
     return wrapper
@@ -84,7 +92,9 @@ def generate_headers() -> dict[str]:
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
+def generate_params(
+    new_params: dict[str], existing_params: dict[str] | None = None
+) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
@@ -112,7 +122,9 @@ def generate_url(resource: str) -> str:
 
 def generate_client() -> httpx.AsyncClient:
     """Function responsible for generating the client used in the context for HTTP requests."""
-    return httpx.AsyncClient(auth=generate_auth(), headers=generate_headers(), timeout=None)
+    return httpx.AsyncClient(
+        auth=generate_auth(), headers=generate_headers(), timeout=None
+    )
 
 
 def is_valid_response(response: httpx.Response) -> bool:
@@ -263,7 +275,9 @@ def fetch_paginated_attributes(response: httpx.Response) -> dict:
     """Function that determines the attributes needed for a paginated HTTP request."""
 
     paginated_attributes = {}
-    paginated_attributes["start_at"] = response["startAt"] if "startAt" in response else None
+    paginated_attributes["start_at"] = (
+        response["startAt"] if "startAt" in response else None
+    )
     paginated_attributes["max_results"] = (
         response["maxResults"] if "maxResults" in response else None
     )
@@ -284,10 +298,13 @@ def generate_pages_list(paginated_attributes: dict) -> list[dict]:
     paginated_attributes["start_at"] = paginated_attributes["max_results"]
     page_list = [
         paginated_attributes["start_at"] + i * paginated_attributes["max_results"]
-        for i in range(int(paginated_attributes["total"] / paginated_attributes["max_results"]))
+        for i in range(
+            int(paginated_attributes["total"] / paginated_attributes["max_results"])
+        )
     ]
     return [
-        {"startAt": page, "maxResults": paginated_attributes["max_results"]} for page in page_list
+        {"startAt": page, "maxResults": paginated_attributes["max_results"]}
+        for page in page_list
     ]
 
 
@@ -308,7 +325,9 @@ def generate_paginated_attributes_list(
         attributes["params"] = params
         attributes["payload"] = payload
         if method == "GET":
-            attributes["params"] = generate_params(new_params=pagination, existing_params=params)
+            attributes["params"] = generate_params(
+                new_params=pagination, existing_params=params
+            )
         elif method == "POST":
             attributes["payload"] = generate_payload(
                 new_content=pagination, existing_content=payload
