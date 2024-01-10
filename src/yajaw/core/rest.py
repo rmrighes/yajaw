@@ -16,6 +16,8 @@ JIRA_BASE_URL = yajaw.CONFIG["jira"]["base_url"]
 SERVER_API = yajaw.CONFIG["jira"]["server_api_v2"]
 AGILE_API = yajaw.CONFIG["jira"]["agile_api_v1"]
 GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
+DEFAULT_PAGINATION = yajaw.CONFIG["pagination"]["default"]
+
 
 
 # Custom authentication class for Personal Access Tokens
@@ -220,7 +222,7 @@ async def send_paginated_requests(
     payload: dict[str] | None = None,
 ) -> list[httpx.Response]:
     """Function with added logic request a paginated HTTP call and basic process of its return."""
-    default_pagination = yajaw.DEFAULT_PAGINATION
+    default_pagination = DEFAULT_PAGINATION
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,

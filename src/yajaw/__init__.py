@@ -33,10 +33,13 @@ def initialize_configuration() -> dict:
     config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(
         config["concurrency"]["semaphore_limit"]
     )
+    config["pagination"]["default"] = [
+        {
+            "startAt": config["pagination"]["start_at"],
+            "maxResults": config["pagination"]["max_results"],
+        }
+    ]
     return config
 
-def initialize_pagination() -> list[dict]:
-    return [{"startAt": 0, "maxResults": 20}]
 
 CONFIG = initialize_configuration()
-DEFAULT_PAGINATION = initialize_pagination()

@@ -11,3 +11,7 @@ msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 [concurrency]
 semaphore_limit = 100
+
+[pagination]
+start_at = 0
+max_results = 20
