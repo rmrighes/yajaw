@@ -8,8 +8,7 @@ type single_response = dict[any]
 
 
 def validate_responses_attribute(responses: list[httpx.Response]) -> None:
-    """Ensures the responses are a non-empty list of httpx.Response objects.
-    """
+    """Ensures the responses are a non-empty list of httpx.Response objects."""
     if isinstance(responses, list):
         if len(responses) > 0:
             if all(isinstance(response, httpx.Response) for response in responses):
@@ -17,7 +16,9 @@ def validate_responses_attribute(responses: list[httpx.Response]) -> None:
     raise exceptions.InvalidResponseError
 
 
-def process_single_nonpaginated_resource(responses: list[httpx.Response]) -> single_response:
+def process_single_nonpaginated_resource(
+    responses: list[httpx.Response],
+) -> single_response:
     """Ensure that an original list of a single httpx.Response object is
     converted into a dictionary, as it is the expected format for a
     single response with a single resource.
@@ -41,16 +42,27 @@ def process_multiple_nonpaginated_resources(responses: list[httpx.Response]):
     return consolidated_responses
 
 
-def process_multiple_paginated_resources(responses: list[httpx.Response], field_array: str):
+def process_multiple_paginated_resources(
+    responses: list[httpx.Response], field_array: str
+):
     """Ensure that an original list of multiple httpx.Response objects is
     converted into a list of dictionaries, as it is the expected format for
     a single response with multiple resources. It flattens the response if
     multiple resources are part of a single response.
     """
     validate_responses_attribute(responses=responses)
-    consolidated_responses = []
-    for one_response in responses:
-        resources = one_response.json()
-        for resource in resources[field_array]:
-            consolidated_responses.append(resource)
-    return consolidated_responses
+
+    # consolidated_responses = []
+
+    # Direct way: Nested For-loop
+    # for one_response in responses:
+    #    resources = one_response.json()
+    #    for resource in resources[field_array]:
+    #        consolidated_responses.append(resource)
+
+    # Alternative option: Pythonic way with list comprehension
+    return [
+        resource
+        for resource_set in responses
+        for resource in resource_set.json()[field_array]
+    ]

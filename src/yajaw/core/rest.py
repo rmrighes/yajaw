@@ -1,10 +1,11 @@
 import asyncio
 from functools import wraps
+from http import HTTPStatus
 
 import httpx
 
 import yajaw
-from yajaw.core import exceptions, HttpStatusCode
+from yajaw.core import exceptions
 from yajaw.utils import conversions
 
 LOGGER = yajaw.CONFIG["log"]["logger"]
@@ -14,22 +15,6 @@ JIRA_BASE_URL = yajaw.CONFIG["jira"]["base_url"]
 SERVER_API = yajaw.CONFIG["jira"]["server_api_v2"]
 AGILE_API = yajaw.CONFIG["jira"]["agile_api_v1"]
 GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
-
-
-# Classes for type hints
-
-
-# class PaginationInfo(TypedDict):
-#    startAt: int
-#    maxResults: int
-#    total: int
-
-
-# class ClientInfo(TypedDict):
-#    base_url: str
-#    headers: dict[str]
-#    params: dict[str]
-#   auth: tuple[str]
 
 
 # Custom authentication class for Personal Access Tokens
@@ -74,7 +59,7 @@ def retry(func):
                 attempt += 1
                 delay *= backoff
         LOGGER.error("Unable to complete the request successfully.")
-        # return result
+        return None
 
     return wrapper
 
@@ -118,15 +103,15 @@ def is_valid_response(response: httpx.Response) -> bool:
 
 
 def is_resource_unauthorized(response: httpx.Response) -> bool:
-    return response.status_code == HttpStatusCode.UNAUTHORIZED
+    return response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def is_resource_forbideen(response: httpx.Response) -> bool:
-    return response.status_code == HttpStatusCode.FORBIDDEN
+    return response.status_code == HTTPStatus.FORBIDDEN
 
 
 def is_resource_not_found(response: httpx.Response) -> bool:
-    return response.status_code == HttpStatusCode.NOT_FOUND
+    return response.status_code == HTTPStatus.NOT_FOUND
 
 
 @retry
