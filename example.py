@@ -1,5 +1,6 @@
 """Module responsible for serving as example of functions."""
 import asyncio
+
 import yajaw
 from yajaw import jira
 
@@ -93,9 +94,9 @@ def sync_main():
 
 if __name__ == "__main__":
 
-    concurrent = False
-    
-    if not concurrent:
+    CONCURRENT = False
+
+    if not CONCURRENT:
         sync_main()
     else:
         raise SystemExit(asyncio.run(async_main()))
