@@ -9,11 +9,19 @@ type SingleResponse = dict[any]
 
 def validate_responses_attribute(responses: list[httpx.Response]) -> None:
     """Ensures the responses are a non-empty list of httpx.Response objects."""
-    if isinstance(responses, list):
-        if len(responses) > 0:
-            if all(isinstance(response, httpx.Response) for response in responses):
-                return None
-    raise exceptions.InvalidResponseError
+
+    if (
+        not isinstance(responses, list)
+        or not len(responses) > 0
+        or not all(isinstance(response, httpx.Response) for response in responses)
+    ):
+        raise exceptions.InvalidResponseError
+
+    # if isinstance(responses, list):
+    #    if len(responses) > 0:
+    #        if all(isinstance(response, httpx.Response) for response in responses):
+    #            return None
+    # raise exceptions.InvalidResponseError
 
 
 def process_single_nonpaginated_resource(
@@ -25,8 +33,7 @@ def process_single_nonpaginated_resource(
     """
     validate_responses_attribute(responses=responses)
     if len(responses) == 1:
-        consolidated_responses = responses[0].json()
-        return consolidated_responses
+        return responses[0].json()
     raise exceptions.InvalidResponseError
 
 
@@ -38,10 +45,7 @@ def process_multiple_nonpaginated_resources(
     a single response with multiple resources.
     """
     validate_responses_attribute(responses=responses)
-    consolidated_responses = [
-        resource for response in responses for resource in response.json()
-    ]
-    return consolidated_responses
+    return [resource for response in responses for resource in response.json()]
 
 
 def process_multiple_paginated_resources(
@@ -63,8 +67,4 @@ def process_multiple_paginated_resources(
     #        consolidated_responses.append(resource)
 
     # Alternative option: Pythonic way with list comprehension
-    return [
-        resource
-        for resource_set in responses
-        for resource in resource_set.json()[field_array]
-    ]
+    return [resource for resource_set in responses for resource in resource_set.json()[field_array]]

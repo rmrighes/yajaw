@@ -9,20 +9,17 @@ type ListResponses = list[dict[any]]
 type SingleResponse = dict[any]
 
 
-async def async_fetch_all_projects(expand: dict = None) -> ListResponses:
+async def async_fetch_all_projects(expand: dict | None = None) -> ListResponses:
     """Wrapper async function for GET /project"""
     method = "GET"
     resource = "project"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(
-        method=method, resource=resource, params=expand
-    )
-    projects = conversions.process_multiple_nonpaginated_resources(responses=response)
-    return projects
+    response = await rest.send_single_request(method=method, resource=resource, params=expand)
+    return conversions.process_multiple_nonpaginated_resources(responses=response)
 
 
-def fetch_all_projects(expand: dict = None) -> ListResponses:
+def fetch_all_projects(expand: dict | None = None) -> ListResponses:
     """Wrapper sync function for GET /project"""
     if expand is None:
         expand = {}
@@ -31,20 +28,17 @@ def fetch_all_projects(expand: dict = None) -> ListResponses:
     return loop.run_until_complete(coroutine)
 
 
-async def async_fetch_project(project_key: str, expand: dict = None) -> SingleResponse:
+async def async_fetch_project(project_key: str, expand: dict | None = None) -> SingleResponse:
     """Wrapper async function for GET /project/{key}"""
     method = "GET"
     resource = f"project/{project_key}"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(
-        method=method, resource=resource, params=expand
-    )
-    project = conversions.process_single_nonpaginated_resource(responses=response)
-    return project
+    response = await rest.send_single_request(method=method, resource=resource, params=expand)
+    return conversions.process_single_nonpaginated_resource(responses=response)
 
 
-def fetch_project(project_key: str, expand: dict = None) -> SingleResponse:
+def fetch_project(project_key: str, expand: dict | None = None) -> SingleResponse:
     """Wrapper sync function for GET /project/{key}"""
     if expand is None:
         expand = {}
@@ -54,7 +48,7 @@ def fetch_project(project_key: str, expand: dict = None) -> SingleResponse:
 
 
 async def async_fetch_projects_from_list(
-    project_keys: list[str], expand: dict = None
+    project_keys: list[str], expand: dict | None = None
 ) -> ListResponses:
     """Wrapper async function for multiple calls on GET /project/{key}"""
     if expand is None:
@@ -63,13 +57,10 @@ async def async_fetch_projects_from_list(
         asyncio.create_task(async_fetch_project(project_key=key, expand=expand))
         for key in project_keys
     ]
-    response = await asyncio.gather(*tasks)
-    return response
+    return await asyncio.gather(*tasks)
 
 
-def fetch_projects_from_list(
-    project_keys: list[str], expand: dict = None
-) -> ListResponses:
+def fetch_projects_from_list(project_keys: list[str], expand: dict | None = None) -> ListResponses:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
     if expand is None:
         expand = {}
@@ -78,20 +69,17 @@ def fetch_projects_from_list(
     return loop.run_until_complete(coroutine)
 
 
-async def async_fetch_issue(issue_key: str, expand: dict = None) -> SingleResponse:
+async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> SingleResponse:
     """Wrapper async function for GET /issue/{key}"""
     method = "GET"
     resource = f"issue/{issue_key}"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(
-        method=method, resource=resource, params=expand
-    )
-    issue = conversions.process_single_nonpaginated_resource(responses=response)
-    return issue
+    response = await rest.send_single_request(method=method, resource=resource, params=expand)
+    return conversions.process_single_nonpaginated_resource(responses=response)
 
 
-def fetch_issue(issue_key: str, expand: dict = None) -> SingleResponse:
+def fetch_issue(issue_key: str, expand: dict | None = None) -> SingleResponse:
     """Wrapper sync function for GET /issue/{key}"""
     if expand is None:
         expand = {}
@@ -101,7 +89,7 @@ def fetch_issue(issue_key: str, expand: dict = None) -> SingleResponse:
 
 
 async def async_search_issues(
-    jql: str, expand: dict = None, field: str = None
+    jql: str, expand: dict | None = None, field: str | None = None
 ) -> ListResponses:
     """Wrapper async function for POST /search"""
     method = "POST"
@@ -114,13 +102,12 @@ async def async_search_issues(
     response = await rest.send_paginated_requests(
         method=method, resource=resource, params=expand, payload=payload
     )
-    issues = conversions.process_multiple_paginated_resources(
+    return conversions.process_multiple_paginated_resources(
         responses=response, field_array=field_array
     )
-    return issues
 
 
-def search_issues(jql: str, expand: dict = None, field: str = None) -> SingleResponse:
+def search_issues(jql: str, expand: dict | None = None, field: str | None = None) -> SingleResponse:
     """Wrapper sync function for POST /search"""
     if expand is None:
         expand = {}

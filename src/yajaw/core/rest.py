@@ -35,6 +35,7 @@ class PersonalAccessTokenAuth(httpx.Auth):
 # Decorators
 
 
+# Must raise exceptions for the cases where makes no sense to retry
 def retry(func):
     """Decorator function with the retry logic for HTTP requests."""
 
@@ -55,20 +56,25 @@ def retry(func):
                             attempt,
                         )
                         return result
-                    LOGGER.debug(
+                    LOGGER.warning(
                         "status code %d -- attempt %02d -- sleeping for %.2f seconds",
                         result.status_code,
                         attempt,
                         delay,
                     )
+                else:
+                    LOGGER.warning("not a httpx.Response")
             except httpx.ConnectError:
-                LOGGER.debug("No valid response received -- attempt %02d", attempt)
+                LOGGER.warning(
+                    "No valid response received (httpx.ConnectError) -- attempt %02d",
+                    attempt,
+                )
             finally:
                 await asyncio.sleep(delay)
                 attempt += 1
                 delay *= backoff
         LOGGER.error("Unable to complete the request successfully.")
-        return None
+        raise exceptions.InvalidResponseError
 
     return wrapper
 
@@ -78,9 +84,7 @@ def generate_headers() -> dict[str]:
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params(
-    new_params: dict[str], existing_params: dict[str] | None = None
-) -> dict[str]:
+def generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
@@ -108,9 +112,7 @@ def generate_url(resource: str) -> str:
 
 def generate_client() -> httpx.AsyncClient:
     """Function responsible for generating the client used in the context for HTTP requests."""
-    return httpx.AsyncClient(
-        auth=generate_auth(), headers=generate_headers(), timeout=None
-    )
+    return httpx.AsyncClient(auth=generate_auth(), headers=generate_headers(), timeout=None)
 
 
 def is_valid_response(response: httpx.Response) -> bool:
@@ -142,16 +144,7 @@ async def send_request(
     payload: dict[str] | None = None,
 ) -> httpx.Response:
     """Function responsible for making a low level HTTP request."""
-    response = await client.request(method=method, url=url, params=params, json=payload)
-    if is_valid_response(response):
-        return response
-    if is_resource_unauthorized(response):
-        raise exceptions.ResourceUnauthorizedError
-    if is_resource_forbideen(response):
-        raise exceptions.ResourceForbiddenError
-    if is_resource_not_found(response):
-        raise exceptions.ResourceNotFoundError
-    return None
+    return await client.request(method=method, url=url, params=params, json=payload)
 
 
 async def send_single_request(
@@ -176,14 +169,18 @@ async def send_single_request(
                 )
             )
             response = await task
-        LOGGER.info(
-            "%d -- %s %s",
-            response.status_code,
-            response.request.method,
-            response.request.url,
-        )
-        if payload is not None:
-            LOGGER.info(payload)
+        if isinstance(response, httpx.Response):
+            LOGGER.info(
+                "%d -- %s %s",
+                response.status_code,
+                response.request.method,
+                response.request.url,
+            )
+            if payload is not None:
+                LOGGER.info(payload)
+        else:
+            LOGGER.info("%s % s did not return a valid response object.", method, url)
+            raise exceptions.InvalidResponseError
         responses.append(response)
     except exceptions.ResourceUnauthorizedError as e:
         raise exceptions.ResourceUnauthorizedError from e
@@ -266,9 +263,7 @@ def fetch_paginated_attributes(response: httpx.Response) -> dict:
     """Function that determines the attributes needed for a paginated HTTP request."""
 
     paginated_attributes = {}
-    paginated_attributes["start_at"] = (
-        response["startAt"] if "startAt" in response else None
-    )
+    paginated_attributes["start_at"] = response["startAt"] if "startAt" in response else None
     paginated_attributes["max_results"] = (
         response["maxResults"] if "maxResults" in response else None
     )
@@ -289,13 +284,10 @@ def generate_pages_list(paginated_attributes: dict) -> list[dict]:
     paginated_attributes["start_at"] = paginated_attributes["max_results"]
     page_list = [
         paginated_attributes["start_at"] + i * paginated_attributes["max_results"]
-        for i in range(
-            int(paginated_attributes["total"] / paginated_attributes["max_results"])
-        )
+        for i in range(int(paginated_attributes["total"] / paginated_attributes["max_results"]))
     ]
     return [
-        {"startAt": page, "maxResults": paginated_attributes["max_results"]}
-        for page in page_list
+        {"startAt": page, "maxResults": paginated_attributes["max_results"]} for page in page_list
     ]
 
 
@@ -316,9 +308,7 @@ def generate_paginated_attributes_list(
         attributes["params"] = params
         attributes["payload"] = payload
         if method == "GET":
-            attributes["params"] = generate_params(
-                new_params=pagination, existing_params=params
-            )
+            attributes["params"] = generate_params(new_params=pagination, existing_params=params)
         elif method == "POST":
             attributes["payload"] = generate_payload(
                 new_content=pagination, existing_content=payload
