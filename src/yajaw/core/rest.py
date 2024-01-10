@@ -50,15 +50,19 @@ def retry(func):
                 if isinstance(result, httpx.Response):
                     if result.status_code == httpx.codes.OK:
                         LOGGER.debug(
-                            f"status code {result.status_code} -- attemp {attempt:02d}"
+                            "status code %d -- attempt %02d",
+                            result.status_code,
+                            attempt,
                         )
                         return result
                     LOGGER.debug(
-                        f"status code {result.status_code} -- "
-                        f"attemp {attempt:02d} -- sleeping for {delay:.2f} seconds"
+                        "status code %d -- attempt %02d -- sleeping for %.2f seconds",
+                        result.status_code,
+                        attempt,
+                        delay,
                     )
             except httpx.ConnectError:
-                LOGGER.debug(f"No valid response received -- attemp {attempt:02d}")
+                LOGGER.debug("No valid response received -- attempt %02d", attempt)
             finally:
                 await asyncio.sleep(delay)
                 attempt += 1
@@ -170,10 +174,13 @@ async def send_single_request(
             )
             response = await task
         LOGGER.info(
-            f"{response.status_code} -- {response.request.method} {response.request.url}"
+            "%d -- %s %s",
+            response.status_code,
+            response.request.method,
+            response.request.url,
         )
         if payload is not None:
-            LOGGER.info(f"{payload}")
+            LOGGER.info(payload)
         responses.append(response)
     except exceptions.ResourceUnauthorizedError as e:
         raise exceptions.ResourceUnauthorizedError from e
@@ -197,7 +204,7 @@ async def send_paginated_requests(
     method: str, resource: str, params: dict[str] = None, payload: dict[str] = None
 ) -> list[httpx.Response]:
     """Function with added logic request a paginated HTTP call and basic process of its return."""
-    default_pagination = [{"startAt": 0, "maxResults": 10}]
+    default_pagination = [{"startAt": 0, "maxResults": 20}]
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,
