@@ -80,7 +80,8 @@ def retry(func):
                 attempt += 1
                 delay *= backoff
         LOGGER.error(
-            "Unable to complete the request successfully after attempt %02d.", (attempt-1)
+            "Unable to complete the request successfully after attempt %02d.",
+            (attempt - 1),
         )
         raise exceptions.InvalidResponseError
 
@@ -219,7 +220,7 @@ async def send_paginated_requests(
     payload: dict[str] | None = None,
 ) -> list[httpx.Response]:
     """Function with added logic request a paginated HTTP call and basic process of its return."""
-    default_pagination = [{"startAt": 0, "maxResults": 20}]
+    default_pagination = yajaw.DEFAULT_PAGINATION
 
     attributes_list = generate_paginated_attributes_list(
         pagination_list=default_pagination,

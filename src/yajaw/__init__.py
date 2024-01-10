@@ -35,5 +35,8 @@ def initialize_configuration() -> dict:
     )
     return config
 
+def initialize_pagination() -> list[dict]:
+    return [{"startAt": 0, "maxResults": 20}]
 
 CONFIG = initialize_configuration()
+DEFAULT_PAGINATION = initialize_pagination()
