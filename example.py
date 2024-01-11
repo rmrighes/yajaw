@@ -18,7 +18,9 @@ async def async_main():
     my_logger.info("There is a total of %i projects.\n", len(projects))
 
     my_logger.info("ASYNC -- Resource: PROJECT/{KEY}")
-    project = await jira.async_fetch_project(project_key="ETOE", expand={"expand": "description"})
+    project = await jira.async_fetch_project(
+        project_key="ETOE", expand={"expand": "description"}
+    )
     my_logger.info("Project key: %s\n", project["key"])
 
     my_logger.info("ASYNC -- Resource: PROJECT/{KEY} from list")
@@ -32,14 +34,22 @@ async def async_main():
 
     my_logger.info("ASYNC -- Resource: ISSUE/{KEY} from list")
     issue_key = "ETOE-8"
-    issue = await jira.async_fetch_issue(issue_key=issue_key, expand={"expand": "changelog"})
+    issue = await jira.async_fetch_issue(
+        issue_key=issue_key, expand={"expand": "changelog"}
+    )
     my_logger.info("%s - %s", issue["key"], issue["fields"]["summary"])
-    my_logger.info("A total of %i change(s) in the changelog.\n", issue["changelog"]["total"])
+    my_logger.info(
+        "A total of %i change(s) in the changelog.\n", issue["changelog"]["total"]
+    )
 
     my_logger.info("ASYNC -- Resource: SEARCH/{JQL}")
     jql = "project in (ETOE, EMI, ESTT, MLOPS)"
-    issues = await jira.async_search_issues(jql=jql, expand={"expand": "changelog"}, field="issues")
-    my_logger.info("There is a total of %i issues returned by the search.\n", len(issues))
+    issues = await jira.async_search_issues(
+        jql=jql, expand={"expand": "changelog"}, field="issues"
+    )
+    my_logger.info(
+        "There is a total of %i issues returned by the search.\n", len(issues)
+    )
 
 
 def sync_main():
@@ -70,19 +80,25 @@ def sync_main():
     issue_key = "ETOE-8"
     issue = jira.fetch_issue(issue_key=issue_key, expand={"expand": "changelog"})
     my_logger.info("%s - %s", issue["key"], issue["fields"]["summary"])
-    my_logger.info("A total of %i change(s) in the changelog.\n", issue["changelog"]["total"])
+    my_logger.info(
+        "A total of %i change(s) in the changelog.\n", issue["changelog"]["total"]
+    )
 
     my_logger.info("SYNC -- Resource: SEARCH/{JQL}")
     try:
         jql = "project in (ETOE, EMI, ESTT, MLOPS)"
-        issues = jira.search_issues(jql=jql, expand={"expand": "description"}, field="issues")
-        my_logger.info("There is a total of %i issues returned by the search.\n", len(issues))
+        issues = jira.search_issues(
+            jql=jql, expand={"expand": "description"}, field="issues"
+        )
+        my_logger.info(
+            "There is a total of %i issues returned by the search.\n", len(issues)
+        )
     except exceptions.InvalidResponseError:
         my_logger.info("Exiting without result - a valid response was never received.")
 
 
 if __name__ == "__main__":
-    CONCURRENT = False
+    CONCURRENT = True
 
     if not CONCURRENT:
         sync_main()

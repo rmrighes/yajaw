@@ -19,10 +19,6 @@ GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
 DEFAULT_PAGINATION = yajaw.CONFIG["pagination"]["default"]
 
 
-
-# Custom authentication class for Personal Access Tokens
-
-
 class PersonalAccessTokenAuth(httpx.Auth):
     """Class used for Personal Access Token auth in httpx."""
 
@@ -66,8 +62,12 @@ def retry(func):
                         delay,
                     )
                 else:
+                    log_msg = (
+                        "Response: object other than httpx.Response -- ",
+                        "attempt %02d -- sleeping for %.2f seconds",
+                    )
                     LOGGER.warning(
-                        "Response: object other than httpx.Response -- attempt %02d -- sleeping for %.2f seconds",
+                        log_msg,
                         attempt,
                         delay,
                     )
@@ -95,9 +95,7 @@ def generate_headers() -> dict[str]:
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params(
-    new_params: dict[str], existing_params: dict[str] | None = None
-) -> dict[str]:
+def generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
@@ -126,7 +124,10 @@ def generate_url(resource: str) -> str:
 def generate_client() -> httpx.AsyncClient:
     """Function responsible for generating the client used in the context for HTTP requests."""
     return httpx.AsyncClient(
-        auth=generate_auth(), headers=generate_headers(), timeout=None
+        auth=generate_auth(),
+        headers=generate_headers(),
+        timeout=None,
+        follow_redirects=True,
     )
 
 
@@ -278,9 +279,7 @@ def fetch_paginated_attributes(response: httpx.Response) -> dict:
     """Function that determines the attributes needed for a paginated HTTP request."""
 
     paginated_attributes = {}
-    paginated_attributes["start_at"] = (
-        response["startAt"] if "startAt" in response else None
-    )
+    paginated_attributes["start_at"] = response["startAt"] if "startAt" in response else None
     paginated_attributes["max_results"] = (
         response["maxResults"] if "maxResults" in response else None
     )
@@ -301,13 +300,10 @@ def generate_pages_list(paginated_attributes: dict) -> list[dict]:
     paginated_attributes["start_at"] = paginated_attributes["max_results"]
     page_list = [
         paginated_attributes["start_at"] + i * paginated_attributes["max_results"]
-        for i in range(
-            int(paginated_attributes["total"] / paginated_attributes["max_results"])
-        )
+        for i in range(int(paginated_attributes["total"] / paginated_attributes["max_results"]))
     ]
     return [
-        {"startAt": page, "maxResults": paginated_attributes["max_results"]}
-        for page in page_list
+        {"startAt": page, "maxResults": paginated_attributes["max_results"]} for page in page_list
     ]
 
 
@@ -328,9 +324,7 @@ def generate_paginated_attributes_list(
         attributes["params"] = params
         attributes["payload"] = payload
         if method == "GET":
-            attributes["params"] = generate_params(
-                new_params=pagination, existing_params=params
-            )
+            attributes["params"] = generate_params(new_params=pagination, existing_params=params)
         elif method == "POST":
             attributes["payload"] = generate_payload(
                 new_content=pagination, existing_content=payload

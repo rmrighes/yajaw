@@ -2,7 +2,7 @@
 the Jira API."""
 import asyncio
 
-from yajaw.core import rest
+from yajaw.core import exceptions, rest
 from yajaw.utils import conversions
 
 type ListResponses = list[dict[any]]
@@ -15,8 +15,11 @@ async def async_fetch_all_projects(expand: dict | None = None) -> ListResponses:
     resource = "project"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(method=method, resource=resource, params=expand)
-    return conversions.process_multiple_nonpaginated_resources(responses=response)
+    try:
+        response = await rest.send_single_request(method=method, resource=resource, params=expand)
+        return conversions.process_multiple_nonpaginated_resources(responses=response)
+    except exceptions.InvalidResponseError:
+        return []
 
 
 def fetch_all_projects(expand: dict | None = None) -> ListResponses:
@@ -34,8 +37,11 @@ async def async_fetch_project(project_key: str, expand: dict | None = None) -> S
     resource = f"project/{project_key}"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(method=method, resource=resource, params=expand)
-    return conversions.process_single_nonpaginated_resource(responses=response)
+    try:
+        response = await rest.send_single_request(method=method, resource=resource, params=expand)
+        return conversions.process_single_nonpaginated_resource(responses=response)
+    except exceptions.InvalidResponseError:
+        return {}
 
 
 def fetch_project(project_key: str, expand: dict | None = None) -> SingleResponse:
@@ -53,11 +59,14 @@ async def async_fetch_projects_from_list(
     """Wrapper async function for multiple calls on GET /project/{key}"""
     if expand is None:
         expand = {}
-    tasks = [
-        asyncio.create_task(async_fetch_project(project_key=key, expand=expand))
-        for key in project_keys
-    ]
-    return await asyncio.gather(*tasks)
+    try:
+        tasks = [
+            asyncio.create_task(async_fetch_project(project_key=key, expand=expand))
+            for key in project_keys
+        ]
+        return await asyncio.gather(*tasks)
+    except exceptions.InvalidResponseError:
+        return []
 
 
 def fetch_projects_from_list(project_keys: list[str], expand: dict | None = None) -> ListResponses:
@@ -75,8 +84,11 @@ async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> Singl
     resource = f"issue/{issue_key}"
     if expand is None:
         expand = {}
-    response = await rest.send_single_request(method=method, resource=resource, params=expand)
-    return conversions.process_single_nonpaginated_resource(responses=response)
+    try:
+        response = await rest.send_single_request(method=method, resource=resource, params=expand)
+        return conversions.process_single_nonpaginated_resource(responses=response)
+    except exceptions.InvalidResponseError:
+        return {}
 
 
 def fetch_issue(issue_key: str, expand: dict | None = None) -> SingleResponse:
@@ -99,15 +111,18 @@ async def async_search_issues(
     content = {"jql": jql}
     field_array = field
     payload = rest.generate_payload(content)
-    response = await rest.send_paginated_requests(
-        method=method, resource=resource, params=expand, payload=payload
-    )
-    return conversions.process_multiple_paginated_resources(
-        responses=response, field_array=field_array
-    )
+    try:
+        response = await rest.send_paginated_requests(
+            method=method, resource=resource, params=expand, payload=payload
+        )
+        return conversions.process_multiple_paginated_resources(
+            responses=response, field_array=field_array
+        )
+    except exceptions.InvalidResponseError:
+        return []
 
 
-def search_issues(jql: str, expand: dict | None = None, field: str | None = None) -> SingleResponse:
+def search_issues(jql: str, expand: dict | None = None, field: str | None = None) -> ListResponses:
     """Wrapper sync function for POST /search"""
     if expand is None:
         expand = {}

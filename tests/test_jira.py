@@ -2,9 +2,7 @@
 from unittest.mock import patch
 
 import httpx
-import pytest
 
-from yajaw.core import exceptions as e
 from yajaw.jira import fetch_project
 
 #########
@@ -39,6 +37,13 @@ def fetch_single_mock_valid_issue() -> httpx.Response:
     )
 
 
+def fetch_single_mock_server_not_found() -> httpx.Response:
+    """Auxiliary function to generate a server not found httpx.Response
+    to be used in different tests.
+    """
+    return httpx.Response(status_code=503, headers=None, request=None, json={})
+
+
 def fetch_single_mock_not_found_issue() -> httpx.Response:
     """Auxiliary function to generate a resource not found httpx.Response
     to be used in different tests.
@@ -56,7 +61,18 @@ def test_fetch_single_valid_issue(mock_rest_request):
     assert response["key"] == "VALID"
 
 
-# Test fails due to wrong exception handling
+@patch("httpx.AsyncClient.request")
+@patch("asyncio.sleep")
+def test_fetch_single_issue_with_invalid_response(mock_rest_request, mock_sleep):
+    """Test fetch_project() with an invalid response."""
+    mock_value = fetch_single_mock_server_not_found()
+    mock_rest_request.return_value = mock_value
+    mock_sleep.return_value = None
+    response = fetch_project("INVALID-KEY")
+    assert isinstance(response, dict)
+    # Empty dictionary evaluate to False
+    assert not bool(response)
+
 
 # @patch("httpx.AsyncClient.request")
 # def test_fetch_single_not_found_issue(mock_rest_request):

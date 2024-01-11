@@ -6,7 +6,6 @@ agile_api_v1 = "rest/agile/1.0"
 greenhopper_api = "rest/greenhopper/1.0"
 
 [log]
-level = "INFO"
 msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 [concurrency]
