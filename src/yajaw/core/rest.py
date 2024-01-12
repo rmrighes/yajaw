@@ -87,7 +87,7 @@ class JiraInfo:
         payload: dict | None = None,
     ):
         self._method = method
-        self.resource = resource
+        self._resource = resource
         self._url = generate_url(resource=resource)
         self._params = params
         self._payload = payload
@@ -165,17 +165,23 @@ def retry(func):
             result: httpx.Response = await func(*args, **kwargs)
             if not retry_response_error_detected(result):
                 YAJAW_LOGGER.info(
-                    f"{result.status_code} - attempt {attempt:02d} - delay {delay:05.2f}s -- {result.request.method} {result.request.url}"
+                    f"{result.status_code} - attempt {attempt:02d} - "
+                    f"delay {delay:05.2f}s -- {result.request.method} "
+                    f"{result.request.url}"
                 )
                 return result
             YAJAW_LOGGER.info(
-                f"{result.status_code} - attempt {attempt:02d} - delay {delay:05.2f}s -- {result.request.method} {result.request.url}"
+                f"{result.status_code} - attempt {attempt:02d} - "
+                f"delay {delay:05.2f}s -- {result.request.method} "
+                f"{result.request.url}"
             )
             await asyncio.sleep(delay)
             attempt += 1
             delay *= BACKOFF
         YAJAW_LOGGER.error(
-            f"{result.status_code} - attempt {attempt:02d} - delay {delay:05.2f}s -- {result.request.method} {result.request.url}"
+            f"{result.status_code} - attempt {attempt:02d} - "
+            f"delay {delay:05.2f}s -- {result.request.method} "
+            f"{result.request.url}"
         )
         raise exceptions.InvalidResponseError
 
@@ -217,7 +223,7 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     jira_list = create_jira_list_with_page_attr(
         page_attr_list=[default_page_attr], jira=jira
     )
-    (initial_jira,) = jira_list
+    initial_jira = jira_list[0]
 
     client = generate_client()
     async with client:
@@ -249,7 +255,8 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
             ]
             group_of_response = await asyncio.gather(*tasks)
 
-            responses.extend([response for response in group_of_response])
+            responses.extend(list(group_of_response))
+
 
     return responses
 

@@ -1,6 +1,7 @@
 import asyncio
-from yajaw.core import rest
+
 from yajaw.core import exceptions as e
+from yajaw.core import rest
 
 
 async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
@@ -9,7 +10,7 @@ async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
-    except e.ResourceNotFoundError as exc:
+    except e.ResourceNotFoundError:
         return []
 
 
@@ -29,7 +30,7 @@ async def async_fetch_project(project_key: str, expand: dict | None = None) -> d
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
-    except e.ResourceNotFoundError as exc:
+    except e.ResourceNotFoundError:
         return {}
 
 
@@ -63,7 +64,7 @@ async def async_fetch_projects_from_list(
         ]
         responses = await asyncio.gather(*tasks)
         return [response.json() for response in responses]
-    except e.ResourceNotFoundError as exc:
+    except e.ResourceNotFoundError:
         return []
 
 
@@ -83,7 +84,7 @@ async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
-    except e.ResourceNotFoundError as exc:
+    except e.ResourceNotFoundError:
         return {}
 
 
@@ -99,17 +100,17 @@ async def async_search_issues(jql: str, expand: dict | None = None) -> list[dict
     expand = {} if expand is None else None
     query = {"jql": jql}
     jira = rest.JiraInfo(
-        method="POST", resource=f"search", params=expand, payload=query
+        method="POST", resource="search", params=expand, payload=query
     )
 
     try:
         responses = await rest.send_paginated_requests(jira=jira)
         return [issue for issue_page in responses for issue in issue_page.json()["issues"]]
-    except e.ResourceNotFoundError as exc:
+    except e.ResourceNotFoundError:
         return []
 
 
-def search_issues(jql: str, expand: dict | None = None, field: str | None = None) -> list[dict]:
+def search_issues(jql: str, expand: dict | None = None) -> list[dict]:
     """Wrapper sync function for POST /search"""
     expand = {} if expand is None else None
     loop = asyncio.new_event_loop()
