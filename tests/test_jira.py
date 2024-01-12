@@ -4,8 +4,8 @@ from unittest.mock import patch
 import httpx
 import pytest
 
-from yajaw.jira import fetch_project
 from yajaw.core import exceptions as e
+from yajaw.jira import fetch_project
 
 #########
 # MOCK!!!
