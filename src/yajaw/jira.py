@@ -10,7 +10,7 @@ async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
 
     info = {
         "method": "GET",
-        "resource": "project}",
+        "resource": "project",
         "api": yajaw.SERVER_API,
         "params": expand,
         "payload": None,
@@ -105,7 +105,7 @@ async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
 
     info = {
         "method": "GET",
-        "resource": f"project/{issue_key}",
+        "resource": f"issue/{issue_key}",
         "api": yajaw.SERVER_API,
         "params": expand,
         "payload": None,
