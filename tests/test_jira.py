@@ -70,5 +70,5 @@ def test_fetch_single_issue_with_server_not_found(mock_rest_request, mock_sleep)
     mock_value = fetch_single_mock_server_not_found()
     mock_rest_request.return_value = mock_value
     mock_sleep.return_value = None
-    with pytest.raises(e.YajawError) as excinfo:
+    with pytest.raises(e.YajawError):
         fetch_project("INVALID-KEY")

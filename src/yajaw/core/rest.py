@@ -9,20 +9,6 @@ import httpx
 import yajaw
 from yajaw.core import exceptions
 
-# Module Constants
-TRIES = yajaw.CONFIG["retries"]["tries"]
-DELAY = yajaw.CONFIG["retries"]["delay"]
-BACKOFF = yajaw.CONFIG["retries"]["backoff"]
-YAJAW_LOGGER = yajaw.CONFIG["log"]["logger"]
-SEMAPHORE = yajaw.CONFIG["concurrency"]["semaphore"]
-JIRA_PAT = yajaw.CONFIG["jira"]["token"]
-JIRA_BASE_URL = yajaw.CONFIG["jira"]["base_url"]
-SERVER_API = yajaw.CONFIG["jira"]["server_api_v2"]
-AGILE_API = yajaw.CONFIG["jira"]["agile_api_v1"]
-GREENHOPPER_API = yajaw.CONFIG["jira"]["greenhopper_api"]
-DEFAULT_PAGINATION = yajaw.CONFIG["pagination"]["default"]
-TIMEOUT = yajaw.CONFIG["requests"]["timeout"]
-
 
 class PersonalAccessTokenAuth(httpx.Auth):
     """Class used for Personal Access Token auth in httpx."""
@@ -58,14 +44,14 @@ def generate_payload(
     return existing_content | new_content
 
 
-def generate_url(resource: str) -> str:
+def generate_url(resource: str, api: str) -> str:
     """Function responsible for generating the url info for HTTP requests."""
-    return f"{JIRA_BASE_URL}/{SERVER_API}/{resource}"
+    return f"{yajaw.JIRA_BASE_URL}/{api}/{resource}"
 
 
 def generate_auth() -> PersonalAccessTokenAuth:
     """Function responsible for generating the authentication info for HTTP requests."""
-    return PersonalAccessTokenAuth(JIRA_PAT)
+    return PersonalAccessTokenAuth(yajaw.JIRA_PAT)
 
 
 def generate_client() -> httpx.AsyncClient:
@@ -73,7 +59,7 @@ def generate_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         auth=generate_auth(),
         headers=generate_headers(),
-        timeout=TIMEOUT,
+        timeout=yajaw.TIMEOUT,
         follow_redirects=True,
     )
 
@@ -81,75 +67,83 @@ def generate_client() -> httpx.AsyncClient:
 class JiraInfo:
     def __init__(
         self,
-        method: str,
-        resource: str,
-        params: dict | None = None,
-        payload: dict | None = None,
+        info: dict,
     ):
-        self._method = method
-        self._resource = resource
-        self._url = generate_url(resource=resource)
-        self._params = params
-        self._payload = payload
+        self.__method = info["method"]
+        self.__resource = info["resource"]
+        self.__api = info["api"]
+        self.__url = generate_url(resource=info["resource"], api=info["api"])
+        self.__params = info["params"]
+        self.__payload = info["payload"]
 
     @property
     def method(self):
-        return self._method
+        return self.__method
 
     @method.setter
     def method(self, mhd: str):
-        self._method = mhd
+        self.__method = mhd
 
     @property
     def resource(self):
-        return self._resource
+        return self.__resource
 
     @resource.setter
     def resource(self, rce: str):
-        self._resource = rce
+        self.__resource = rce
+
+    @property
+    def api(self):
+        return self.__api
+
+    @api.setter
+    def api(self, api: str):
+        self.__api = api
 
     @property
     def url(self):
-        return self._url
+        return self.__url
 
     @url.setter
     def url(self, url: str):
-        self._url = url
+        self.__url = url
 
     @property
     def params(self):
-        return self._params
+        return self.__params
 
     @params.setter
     def params(self, pms: dict):
-        self._params = pms
+        self.__params = pms
 
     @property
     def payload(self):
-        return self._payload
+        return self.__payload
 
     @payload.setter
     def payload(self, pad: dict):
-        self._payload = pad
+        self.__payload = pad
 
 
 def retry_response_error_detected(result: httpx.Response) -> bool:
     proceed: bool = True
 
     if not isinstance(result, httpx.Response):
-        YAJAW_LOGGER.error("pending log message -- no_retry_response_error_detected")
+        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.InvalidResponseError
     if result.status_code == HTTPStatus.UNAUTHORIZED:
-        YAJAW_LOGGER.error("pending log message -- no_retry_response_error_detected")
+        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceUnauthorizedError
     if result.status_code == HTTPStatus.FORBIDDEN:
-        YAJAW_LOGGER.error("pending log message -- no_retry_response_error_detected")
+        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceForbiddenError
     if result.status_code == HTTPStatus.NOT_FOUND:
-        YAJAW_LOGGER.warning("AAApending log message -- no_retry_response_error_detected")
+        yajaw.LOGGER.warning(
+            "AAApending log message -- no_retry_response_error_detected"
+        )
         raise exceptions.ResourceNotFoundError
     if result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
-        YAJAW_LOGGER.error("pending log message -- no_retry_response_error_detected")
+        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceMethodNotAllowedError
     if httpx.codes.is_success(result.status_code):
         proceed = False
@@ -160,25 +154,25 @@ def retry(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
-        delay = DELAY
-        while attempt <= TRIES:
+        delay = yajaw.DELAY
+        while attempt <= yajaw.TRIES:
             result: httpx.Response = await func(*args, **kwargs)
             if not retry_response_error_detected(result):
-                YAJAW_LOGGER.info(
+                yajaw.LOGGER.info(
                     f"{result.status_code} - attempt {attempt:02d} - "
                     f"delay {delay:05.2f}s -- {result.request.method} "
                     f"{result.request.url}"
                 )
                 return result
-            YAJAW_LOGGER.info(
+            yajaw.LOGGER.info(
                 f"{result.status_code} - attempt {attempt:02d} - "
                 f"delay {delay:05.2f}s -- {result.request.method} "
                 f"{result.request.url}"
             )
             await asyncio.sleep(delay)
             attempt += 1
-            delay *= BACKOFF
-        YAJAW_LOGGER.error(
+            delay *= yajaw.BACKOFF
+        yajaw.LOGGER.error(
             f"{result.status_code} - attempt {attempt:02d} - "
             f"delay {delay:05.2f}s -- {result.request.method} "
             f"{result.request.url}"
@@ -195,7 +189,7 @@ async def send_request(jira: JiraInfo, client: httpx.AsyncClient) -> httpx.Respo
     url = jira.url
     params = jira.params
     payload = jira.payload
-    async with SEMAPHORE:
+    async with yajaw.SEMAPHORE:
         return await client.request(method=method, url=url, params=params, json=payload)
 
 
@@ -209,17 +203,17 @@ async def send_single_request(
         task = asyncio.create_task(send_request(jira=jira, client=client))
         response = await task
     except exceptions.ResourceNotFoundError as exc:
-        YAJAW_LOGGER.warning("pending log message -- send_single_request")
+        yajaw.LOGGER.warning("pending log message -- send_single_request")
         raise exceptions.ResourceNotFoundError from exc
     except exceptions.YajawError as e:
-        YAJAW_LOGGER.exception("pending log message -- send_single_request")
+        yajaw.LOGGER.exception("pending log message -- send_single_request")
         raise exceptions.YajawError from e
     return response
 
 
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """Function that wraps send_single_request and and call it for all necessary pages."""
-    default_page_attr = DEFAULT_PAGINATION
+    default_page_attr = yajaw.DEFAULT_PAGINATION
     jira_list = create_jira_list_with_page_attr(
         page_attr_list=[default_page_attr], jira=jira
     )
@@ -257,7 +251,6 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
 
             responses.extend(list(group_of_response))
 
-
     return responses
 
 
@@ -287,20 +280,22 @@ def create_jira_list_with_page_attr(
     a list with respective JiraInfo objects."""
     jira_list = []
     for page_attr in page_attr_list:
-        unique_jira = JiraInfo(
-            method=jira.method,
-            resource=jira.resource,
-            params=jira.params,
-            payload=jira.payload,
-        )
-        if unique_jira.method == "GET":
-            unique_jira.params = generate_params(
-                new_params=page_attr, existing_params=unique_jira.params
+        unique_info = {
+            "method": jira.method,
+            "resource": jira.resource,
+            "api": jira.api,
+            "params": jira.params,
+            "payload": jira.payload
+        }
+        if unique_info["method"] == "GET":
+            unique_info["params"] = generate_params(
+                new_params=page_attr, existing_params=unique_info["params"]
             )
-        if unique_jira.method == "POST":
-            unique_jira.payload = generate_payload(
-                new_content=page_attr, existing_content=unique_jira.payload
+        if unique_info["method"] == "POST":
+            unique_info["payload"] = generate_payload(
+                new_content=page_attr, existing_content=unique_info["payload"]
             )
+        unique_jira = JiraInfo(info=unique_info)
         jira_list.append(unique_jira)
     return jira_list
 

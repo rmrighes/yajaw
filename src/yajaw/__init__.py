@@ -41,3 +41,16 @@ def initialize_configuration() -> dict:
 
 
 CONFIG = initialize_configuration()
+
+TRIES = CONFIG["retries"]["tries"]
+DELAY = CONFIG["retries"]["delay"]
+BACKOFF = CONFIG["retries"]["backoff"]
+LOGGER = CONFIG["log"]["logger"]
+SEMAPHORE = CONFIG["concurrency"]["semaphore"]
+JIRA_PAT = CONFIG["jira"]["token"]
+JIRA_BASE_URL = CONFIG["jira"]["base_url"]
+SERVER_API = CONFIG["jira"]["server_api_v2"]
+AGILE_API = CONFIG["jira"]["agile_api_v1"]
+GREENHOPPER_API = CONFIG["jira"]["greenhopper_api"]
+DEFAULT_PAGINATION = CONFIG["pagination"]["default"]
+TIMEOUT = CONFIG["requests"]["timeout"]

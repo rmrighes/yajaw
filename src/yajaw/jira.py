@@ -1,12 +1,23 @@
 import asyncio
 
+import yajaw
 from yajaw.core import exceptions as e
 from yajaw.core import rest
 
 
 async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
     expand = {} if expand is None else None
-    jira = rest.JiraInfo(method="GET", resource="project", params=expand, payload=None)
+
+    info = {
+        "method": "GET",
+        "resource": "project}",
+        "api": yajaw.SERVER_API,
+        "params": expand,
+        "payload": None,
+    }
+
+    jira = rest.JiraInfo(info=info)
+
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
@@ -24,9 +35,17 @@ def fetch_all_projects(expand: dict | None = None) -> list[dict]:
 
 async def async_fetch_project(project_key: str, expand: dict | None = None) -> dict:
     expand = {} if expand is None else None
-    jira = rest.JiraInfo(
-        method="GET", resource=f"project/{project_key}", params=expand, payload=None
-    )
+
+    info = {
+        "method": "GET",
+        "resource": f"project/{project_key}",
+        "api": yajaw.SERVER_API,
+        "params": expand,
+        "payload": None,
+    }
+
+    jira = rest.JiraInfo(info=info)
+
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
@@ -47,15 +66,18 @@ async def async_fetch_projects_from_list(
 ) -> dict:
     expand = {} if expand is None else None
 
-    jira_list = [
-        rest.JiraInfo(
-            method="GET",
-            resource=f"project/{project_key}",
-            params=expand,
-            payload=None,
-        )
+    info_list = [
+        {
+            "method": "GET",
+            "resource": f"project/{project_key}",
+            "api": yajaw.SERVER_API,
+            "params": expand,
+            "payload": None,
+        }
         for project_key in project_keys
     ]
+
+    jira_list = [rest.JiraInfo(info=info) for info in info_list]
 
     try:
         tasks = [
@@ -68,7 +90,9 @@ async def async_fetch_projects_from_list(
         return []
 
 
-def fetch_projects_from_list(project_keys: list[str], expand: dict | None = None) -> list[dict]:
+def fetch_projects_from_list(
+    project_keys: list[str], expand: dict | None = None
+) -> list[dict]:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
     expand = {} if expand is None else None
     loop = asyncio.new_event_loop()
@@ -78,9 +102,17 @@ def fetch_projects_from_list(project_keys: list[str], expand: dict | None = None
 
 async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
     expand = {} if expand is None else None
-    jira = rest.JiraInfo(
-        method="GET", resource=f"issue/{issue_key}", params=expand, payload=None
-    )
+
+    info = {
+        "method": "GET",
+        "resource": f"project/{issue_key}",
+        "api": yajaw.SERVER_API,
+        "params": expand,
+        "payload": None,
+    }
+
+    jira = rest.JiraInfo(info=info)
+
     try:
         response = await rest.send_single_request(jira=jira)
         return response.json()
@@ -99,13 +131,22 @@ def fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
 async def async_search_issues(jql: str, expand: dict | None = None) -> list[dict]:
     expand = {} if expand is None else None
     query = {"jql": jql}
-    jira = rest.JiraInfo(
-        method="POST", resource="search", params=expand, payload=query
-    )
+
+    info = {
+        "method": "POST",
+        "resource": "search",
+        "api": yajaw.SERVER_API,
+        "params": expand,
+        "payload": query,
+    }
+
+    jira = rest.JiraInfo(info=info)
 
     try:
         responses = await rest.send_paginated_requests(jira=jira)
-        return [issue for issue_page in responses for issue in issue_page.json()["issues"]]
+        return [
+            issue for issue_page in responses for issue in issue_page.json()["issues"]
+        ]
     except e.ResourceNotFoundError:
         return []
 
