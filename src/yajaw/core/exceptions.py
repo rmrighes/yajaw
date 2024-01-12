@@ -27,3 +27,6 @@ class ResourceForbiddenError(HttpClientError):
 
 class ResourceNotFoundError(HttpClientError):
     "Resource not found"
+
+class ResourceMethodNotAllowedError(HttpClientError):
+    "Resource does not support method"
