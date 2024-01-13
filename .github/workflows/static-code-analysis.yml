@@ -5,7 +5,7 @@ on: [push]
 jobs:
   static-code-analyzers:
     runs-on: ubuntu-latest
-    name: Pylint
+    name: Static Code Analyzers
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
