@@ -13,6 +13,7 @@ __all__ = ["jira"]
 
 SEM_LIMIT = 5
 
+
 def load_settings_from_file() -> dict:
     """Load configuration settings from file"""
     fname = "yajaw.toml"

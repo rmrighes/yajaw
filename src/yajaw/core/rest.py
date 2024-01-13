@@ -27,9 +27,7 @@ def generate_headers() -> dict[str]:
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params(
-    new_params: dict[str], existing_params: dict[str] | None = None
-) -> dict[str]:
+def generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
@@ -66,7 +64,8 @@ def generate_client() -> httpx.AsyncClient:
 
 
 class JiraInfo:
-    '''TBD'''
+    """TBD"""
+
     def __init__(
         self,
         info: dict,
@@ -80,67 +79,67 @@ class JiraInfo:
 
     @property
     def method(self):
-        '''TBD'''
+        """TBD"""
         return self.__method
 
     @method.setter
     def method(self, mhd: str):
-        '''TBD'''
+        """TBD"""
         self.__method = mhd
 
     @property
     def resource(self):
-        '''TBD'''
+        """TBD"""
         return self.__resource
 
     @resource.setter
     def resource(self, rce: str):
-        '''TBD'''
+        """TBD"""
         self.__resource = rce
 
     @property
     def api(self):
-        '''TBD'''
+        """TBD"""
         return self.__api
 
     @api.setter
     def api(self, api: str):
-        '''TBD'''
+        """TBD"""
         self.__api = api
 
     @property
     def url(self):
-        '''TBD'''
+        """TBD"""
         return self.__url
 
     @url.setter
     def url(self, url: str):
-        '''TBD'''
+        """TBD"""
         self.__url = url
 
     @property
     def params(self):
-        '''TBD'''
+        """TBD"""
         return self.__params
 
     @params.setter
     def params(self, pms: dict):
-        '''TBD'''
+        """TBD"""
         self.__params = pms
 
     @property
     def payload(self):
-        '''TBD'''
+        """TBD"""
         return self.__payload
 
     @payload.setter
     def payload(self, pad: dict):
-        '''TBD'''
+        """TBD"""
         self.__payload = pad
 
 
 def retry_response_error_detected(result: httpx.Response) -> bool:
-    '''TBD'''
+    """TBD"""
     proceed: bool = True
 
     if not isinstance(result, httpx.Response):
@@ -153,9 +152,7 @@ def retry_response_error_detected(result: httpx.Response) -> bool:
         yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceForbiddenError
     if result.status_code == HTTPStatus.NOT_FOUND:
-        yajaw.LOGGER.warning(
-            "AAApending log message -- no_retry_response_error_detected"
-        )
+        yajaw.LOGGER.warning("AAApending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceNotFoundError
     if result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
         yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
@@ -166,7 +163,8 @@ def retry_response_error_detected(result: httpx.Response) -> bool:
 
 
 def retry(func):
-    '''TBD'''
+    """TBD"""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
@@ -230,9 +228,7 @@ async def send_single_request(
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """Function that wraps send_single_request and and call it for all necessary pages."""
     default_page_attr = yajaw.DEFAULT_PAGINATION
-    jira_list = create_jira_list_with_page_attr(
-        page_attr_list=[default_page_attr], jira=jira
-    )
+    jira_list = create_jira_list_with_page_attr(page_attr_list=[default_page_attr], jira=jira)
     initial_jira = jira_list[0]
 
     client = generate_client()
@@ -250,9 +246,7 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
             page_attr_list = create_list_of_page_attr(page_attr=page_attr)
 
             # Generate the updated jira_list
-            jira_list = create_jira_list_with_page_attr(
-                page_attr_list=page_attr_list, jira=jira
-            )
+            jira_list = create_jira_list_with_page_attr(page_attr_list=page_attr_list, jira=jira)
 
             # Create concurrent requests for the additional pages
             # iterate over jira_list
@@ -279,19 +273,12 @@ def create_list_of_page_attr(page_attr: dict) -> list[dict]:
 
     page_attr_list = [
         page_attr["start_at"] + i * page_attr["max_results"]
-        for i in range(
-            int(math.ceil(page_attr["total"] / page_attr["max_results"])) - 1
-        )
+        for i in range(int(math.ceil(page_attr["total"] / page_attr["max_results"])) - 1)
     ]
-    return [
-        {"startAt": page, "maxResults": page_attr["max_results"]}
-        for page in page_attr_list
-    ]
+    return [{"startAt": page, "maxResults": page_attr["max_results"]} for page in page_attr_list]
 
 
-def create_jira_list_with_page_attr(
-    page_attr_list: list[dict], jira: JiraInfo
-) -> list[JiraInfo]:
+def create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) -> list[JiraInfo]:
     """Function that gets a list of page attributes and createa
     a list with respective JiraInfo objects."""
     jira_list = []
@@ -301,7 +288,7 @@ def create_jira_list_with_page_attr(
             "resource": jira.resource,
             "api": jira.api,
             "params": jira.params,
-            "payload": jira.payload
+            "payload": jira.payload,
         }
         if unique_info["method"] == "GET":
             unique_info["params"] = generate_params(
@@ -317,12 +304,10 @@ def create_jira_list_with_page_attr(
 
 
 def retrieve_pagination_attributes(response: httpx.Response) -> dict:
-    '''TBD'''
+    """TBD"""
     page_attr = {}
     response_json = response.json()
-    page_attr["start_at"] = (
-        response_json["startAt"] if "startAt" in response_json else None
-    )
+    page_attr["start_at"] = response_json["startAt"] if "startAt" in response_json else None
     page_attr["max_results"] = (
         response_json["maxResults"] if "maxResults" in response_json else None
     )

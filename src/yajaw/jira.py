@@ -1,4 +1,4 @@
-'''TBD'''
+"""TBD"""
 import asyncio
 
 import yajaw
@@ -7,7 +7,7 @@ from yajaw.core import rest
 
 
 async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
-    '''TBD'''
+    """TBD"""
     expand = {} if expand is None else None
 
     info = {
@@ -36,7 +36,7 @@ def fetch_all_projects(expand: dict | None = None) -> list[dict]:
 
 
 async def async_fetch_project(project_key: str, expand: dict | None = None) -> dict:
-    '''TBD'''
+    """TBD"""
     expand = {} if expand is None else None
 
     info = {
@@ -67,7 +67,7 @@ def fetch_project(project_key: str, expand: dict | None = None) -> dict:
 async def async_fetch_projects_from_list(
     project_keys: list[str], expand: dict | None = None
 ) -> dict:
-    '''TBD'''
+    """TBD"""
     expand = {} if expand is None else None
 
     info_list = [
@@ -84,19 +84,14 @@ async def async_fetch_projects_from_list(
     jira_list = [rest.JiraInfo(info=info) for info in info_list]
 
     try:
-        tasks = [
-            asyncio.create_task(rest.send_single_request(jira=jira))
-            for jira in jira_list
-        ]
+        tasks = [asyncio.create_task(rest.send_single_request(jira=jira)) for jira in jira_list]
         responses = await asyncio.gather(*tasks)
         return [response.json() for response in responses]
     except e.ResourceNotFoundError:
         return []
 
 
-def fetch_projects_from_list(
-    project_keys: list[str], expand: dict | None = None
-) -> list[dict]:
+def fetch_projects_from_list(project_keys: list[str], expand: dict | None = None) -> list[dict]:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
     expand = {} if expand is None else None
     loop = asyncio.new_event_loop()
@@ -105,7 +100,7 @@ def fetch_projects_from_list(
 
 
 async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
-    '''TBD'''
+    """TBD"""
     expand = {} if expand is None else None
 
     info = {
@@ -134,7 +129,7 @@ def fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
 
 
 async def async_search_issues(jql: str, expand: dict | None = None) -> list[dict]:
-    '''TBD'''
+    """TBD"""
     expand = {} if expand is None else None
     query = {"jql": jql}
 
@@ -150,9 +145,7 @@ async def async_search_issues(jql: str, expand: dict | None = None) -> list[dict
 
     try:
         responses = await rest.send_paginated_requests(jira=jira)
-        return [
-            issue for issue_page in responses for issue in issue_page.json()["issues"]
-        ]
+        return [issue for issue_page in responses for issue in issue_page.json()["issues"]]
     except e.ResourceNotFoundError:
         return []
 

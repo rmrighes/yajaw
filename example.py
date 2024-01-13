@@ -1,4 +1,4 @@
-'''TBD'''
+"""TBD"""
 import asyncio
 
 from yajaw import jira
@@ -6,7 +6,7 @@ from yajaw.utils.decorators import duration
 
 
 async def async_main():
-    '''TBD'''
+    """TBD"""
     await use_async_fetch_all_projects()
     print()
     await use_async_fetch_projects()
@@ -20,7 +20,7 @@ async def async_main():
 
 @duration
 async def use_async_fetch_all_projects():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT")
     projects = await jira.async_fetch_all_projects()
     if projects:
@@ -33,7 +33,7 @@ async def use_async_fetch_all_projects():
 
 @duration
 async def use_async_fetch_projects():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT/{KEY}")
     project = await jira.async_fetch_project(project_key="EMI")
     if project:
@@ -44,7 +44,7 @@ async def use_async_fetch_projects():
 
 @duration
 async def use_async_fetch_projects_from_list():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT FROM LIST")
     project_keys = ["ETOE", "ESTT", "EMI"]
     projects = await jira.async_fetch_projects_from_list(project_keys=project_keys)
@@ -58,7 +58,7 @@ async def use_async_fetch_projects_from_list():
 
 @duration
 async def use_async_fetch_issue():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: ISSUE/{KEY}")
     issue = await jira.async_fetch_issue(issue_key="ETOE-8")
     if issue:
@@ -69,7 +69,7 @@ async def use_async_fetch_issue():
 
 @duration
 async def use_async_search_issues():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: SEARCH")
     jql = "project in (ETOE, ESTT, EMI, MLOPS)"
     issues = await jira.async_search_issues(jql=jql)
@@ -82,7 +82,7 @@ async def use_async_search_issues():
 
 
 def sync_main():
-    '''TBD'''
+    """TBD"""
     use_fetch_all_projects()
     print()
     use_fetch_projects()
@@ -96,7 +96,7 @@ def sync_main():
 
 @duration
 def use_fetch_all_projects():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT")
     projects = jira.fetch_all_projects()
     if projects:
@@ -109,7 +109,7 @@ def use_fetch_all_projects():
 
 @duration
 def use_fetch_projects():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT/{KEY}")
     project = jira.fetch_project(project_key="EMI")
     if project:
@@ -120,7 +120,7 @@ def use_fetch_projects():
 
 @duration
 def use_fetch_projects_from_list():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT FROM LIST")
     project_keys = ["ETOE", "ESTT", "EMI"]
     projects = jira.fetch_projects_from_list(project_keys=project_keys)
@@ -134,7 +134,7 @@ def use_fetch_projects_from_list():
 
 @duration
 def use_fetch_issue():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: ISSUE/{KEY}")
     issue = jira.fetch_issue(issue_key="ETOE-8")
     if issue:
@@ -145,7 +145,7 @@ def use_fetch_issue():
 
 @duration
 def use_search_issues():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: SEARCH")
     jql = "project in (ETOE, ESTT, EMI, MLOPS)"
     issues = jira.search_issues(jql=jql)
