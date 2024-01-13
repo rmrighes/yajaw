@@ -14,13 +14,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        python-version-file: 'pyproject.toml'
         cache: 'pip'
-        cache-dependency-path: pyproject.toml
+        cache-dependency-path: 'pyproject.toml'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pylint hatch
-        pip cache dir
     - name: Analysing the code with pylint
       run: |
         hatch run pylint $(git ls-files '*.py')
