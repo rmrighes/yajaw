@@ -6,8 +6,18 @@ agile_api_v1 = "rest/agile/1.0"
 greenhopper_api = "rest/greenhopper/1.0"
 
 [log]
-level = "INFO"
 msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+[retries]
+tries = 10
+delay = 0.1
+backoff = 1.8
+
+[requests]
+timeout = 60
+
 [concurrency]
-semaphore_limit = 100
+semaphore_limit = 30
+
+[pagination]
+page_results = 20
