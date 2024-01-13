@@ -66,6 +66,7 @@ def generate_client() -> httpx.AsyncClient:
 
 
 class JiraInfo:
+    '''TBD'''
     def __init__(
         self,
         info: dict,
@@ -79,54 +80,67 @@ class JiraInfo:
 
     @property
     def method(self):
+        '''TBD'''
         return self.__method
 
     @method.setter
     def method(self, mhd: str):
+        '''TBD'''
         self.__method = mhd
 
     @property
     def resource(self):
+        '''TBD'''
         return self.__resource
 
     @resource.setter
     def resource(self, rce: str):
+        '''TBD'''
         self.__resource = rce
 
     @property
     def api(self):
+        '''TBD'''
         return self.__api
 
     @api.setter
     def api(self, api: str):
+        '''TBD'''
         self.__api = api
 
     @property
     def url(self):
+        '''TBD'''
         return self.__url
 
     @url.setter
     def url(self, url: str):
+        '''TBD'''
         self.__url = url
 
     @property
     def params(self):
+        '''TBD'''
         return self.__params
 
     @params.setter
     def params(self, pms: dict):
+        '''TBD'''
         self.__params = pms
 
     @property
     def payload(self):
+        '''TBD'''
         return self.__payload
 
     @payload.setter
     def payload(self, pad: dict):
+        '''TBD'''
         self.__payload = pad
 
 
 def retry_response_error_detected(result: httpx.Response) -> bool:
+    '''TBD'''
     proceed: bool = True
 
     if not isinstance(result, httpx.Response):
@@ -152,6 +166,7 @@ def retry_response_error_detected(result: httpx.Response) -> bool:
 
 
 def retry(func):
+    '''TBD'''
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
@@ -302,6 +317,7 @@ def create_jira_list_with_page_attr(
 
 
 def retrieve_pagination_attributes(response: httpx.Response) -> dict:
+    '''TBD'''
     page_attr = {}
     response_json = response.json()
     page_attr["start_at"] = (
