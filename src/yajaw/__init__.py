@@ -11,6 +11,7 @@ from pathlib import Path
 
 __all__ = ["jira"]
 
+SEM_LIMIT = 5
 
 def load_settings_from_file() -> dict:
     """Load configuration settings from file"""
@@ -32,7 +33,7 @@ def initialize_configuration() -> dict:
     config["log"]["logger"] = define_logger(config)
     limit = config["concurrency"]["semaphore_limit"]
     # Ensures a minimum value of 5 for the BoundedSemaphore
-    semaphore_limit = limit if limit > 5 else 5
+    semaphore_limit = limit if limit > SEM_LIMIT else SEM_LIMIT
     config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(semaphore_limit)
     config["pagination"]["default"] = {
         "startAt": 0,

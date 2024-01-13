@@ -1,7 +1,8 @@
 import asyncio
-from functools import wraps
 from contextlib import contextmanager
+from functools import wraps
 from time import perf_counter
+
 import yajaw
 
 
@@ -11,7 +12,7 @@ def duration(func):
         start_ts = perf_counter()
         yield
         dur = perf_counter() - start_ts
-        yajaw.LOGGER.info("{} took {:.2f} seconds".format(func.__name__, dur))
+        yajaw.LOGGER.info(f"{func.__name__} took {dur:.2f} seconds")
 
     @wraps(func)
     def wrapper(*args, **kwargs):

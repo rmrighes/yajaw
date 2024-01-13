@@ -1,4 +1,5 @@
 import asyncio
+
 from yajaw import jira
 from yajaw.utils.decorators import duration
 

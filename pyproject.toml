@@ -83,3 +83,6 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 100
+ignore = [
+  "S311",  # yajaw is not for cryptographic purposes
+]
