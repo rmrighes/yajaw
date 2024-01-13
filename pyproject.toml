@@ -85,4 +85,5 @@ exclude_lines = [
 line-length = 100
 ignore = [
   "S311",  # yajaw is not for cryptographic purposes
+  "T201",  # print() is used only on temporary example file 
 ]

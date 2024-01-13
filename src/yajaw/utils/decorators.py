@@ -1,3 +1,4 @@
+'''TBD'''
 import asyncio
 from contextlib import contextmanager
 from functools import wraps
@@ -7,6 +8,7 @@ import yajaw
 
 
 def duration(func):
+    '''TBD'''
     @contextmanager
     def wrapping_logic():
         start_ts = perf_counter()

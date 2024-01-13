@@ -1,3 +1,4 @@
+'''TBD'''
 import asyncio
 
 import yajaw
@@ -6,6 +7,7 @@ from yajaw.core import rest
 
 
 async def async_fetch_all_projects(expand: dict | None = None) -> list[dict]:
+    '''TBD'''
     expand = {} if expand is None else None
 
     info = {
@@ -34,6 +36,7 @@ def fetch_all_projects(expand: dict | None = None) -> list[dict]:
 
 
 async def async_fetch_project(project_key: str, expand: dict | None = None) -> dict:
+    '''TBD'''
     expand = {} if expand is None else None
 
     info = {
@@ -64,6 +67,7 @@ def fetch_project(project_key: str, expand: dict | None = None) -> dict:
 async def async_fetch_projects_from_list(
     project_keys: list[str], expand: dict | None = None
 ) -> dict:
+    '''TBD'''
     expand = {} if expand is None else None
 
     info_list = [
@@ -101,6 +105,7 @@ def fetch_projects_from_list(
 
 
 async def async_fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
+    '''TBD'''
     expand = {} if expand is None else None
 
     info = {
@@ -129,6 +134,7 @@ def fetch_issue(issue_key: str, expand: dict | None = None) -> dict:
 
 
 async def async_search_issues(jql: str, expand: dict | None = None) -> list[dict]:
+    '''TBD'''
     expand = {} if expand is None else None
     query = {"jql": jql}
 
