@@ -3,6 +3,7 @@ import asyncio
 import math
 from functools import wraps
 from http import HTTPStatus
+from random import uniform
 
 import httpx
 
@@ -154,27 +155,27 @@ def retry(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
-        delay = yajaw.DELAY
+        delay = uniform(0, yajaw.DELAY)
         while attempt <= yajaw.TRIES:
+            await asyncio.sleep(delay)
             result: httpx.Response = await func(*args, **kwargs)
             if not retry_response_error_detected(result):
                 yajaw.LOGGER.info(
                     f"{result.status_code} - attempt {attempt:02d} - "
-                    f"delay {delay:05.2f}s -- {result.request.method} "
+                    f"delay {delay:04.2f}s -- {result.request.method} "
                     f"{result.request.url}"
                 )
                 return result
             yajaw.LOGGER.info(
                 f"{result.status_code} - attempt {attempt:02d} - "
-                f"delay {delay:05.2f}s -- {result.request.method} "
+                f"delay {delay:04.2f}s -- {result.request.method} "
                 f"{result.request.url}"
             )
-            await asyncio.sleep(delay)
             attempt += 1
             delay *= yajaw.BACKOFF
         yajaw.LOGGER.error(
             f"{result.status_code} - attempt {attempt:02d} - "
-            f"delay {delay:05.2f}s -- {result.request.method} "
+            f"delay {delay:04.2f}s -- {result.request.method} "
             f"{result.request.url}"
         )
         raise exceptions.InvalidResponseError

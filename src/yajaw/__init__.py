@@ -30,9 +30,10 @@ def initialize_configuration() -> dict:
     """Creates the global configuration based on environment."""
     config = load_settings_from_file()
     config["log"]["logger"] = define_logger(config)
-    config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(
-        config["concurrency"]["semaphore_limit"]
-    )
+    limit = config["concurrency"]["semaphore_limit"]
+    # Ensures a minimum value of 5 for the BoundedSemaphore
+    semaphore_limit = limit if limit > 5 else 5
+    config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(semaphore_limit)
     config["pagination"]["default"] = {
         "startAt": 0,
         "maxResults": config["pagination"]["page_results"],
