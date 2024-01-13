@@ -5,6 +5,7 @@ on: [push]
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    environment: development
     name: Pytest
     strategy:
       matrix:

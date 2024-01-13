@@ -5,6 +5,7 @@ on: [push]
 jobs:
   static-code-analyzers:
     runs-on: ubuntu-latest
+    environment: development
     name: Static Code Analyzers
     strategy:
       matrix:
