@@ -13,9 +13,9 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version-file: pyproject.toml
-        cache: 'pip'
-        cache-dependency-path: 'pyproject.toml'
+        python-version: ${{ matrix.python-version }}
+        cache: pyenv
+        cache-dependency-path: pyproject.toml
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
