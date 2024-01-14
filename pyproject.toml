@@ -37,7 +37,8 @@ python = "3.12"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
-  "pylint"
+  "pylint",
+  "bandit",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -88,3 +89,7 @@ ignore = [
   "T201",  # print() is used only on temporary example file 
 ]
 output-format = "github"
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B311"]

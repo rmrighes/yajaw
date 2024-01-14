@@ -28,3 +28,6 @@ jobs:
     - name: Analysing the code with Ruff
       run: |
         hatch fmt --check
+    - name: Analysing the code with Bandit
+      run: |
+        hatch run bandit -c pyproject.toml $(git ls-files '*.py')
