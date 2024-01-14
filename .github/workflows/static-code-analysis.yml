@@ -24,10 +24,10 @@ jobs:
         pip install pylint hatch
     - name: Analysing the code with Pylint
       run: |
-        hatch run pylint $(git ls-files '*.py')
+        hatch run pylint $(git ls-files 'src/*.py')
     - name: Analysing the code with Ruff
       run: |
         hatch fmt --check
     - name: Analysing the code with Bandit
       run: |
-        hatch run bandit -c pyproject.toml $(git ls-files '*.py')
+        hatch run bandit -c pyproject.toml $(git ls-files 'src/*.py')

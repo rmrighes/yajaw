@@ -1,9 +1,9 @@
 """Module responsible for lower level HTTP requests."""
 import asyncio
 import math
+import secrets
 from functools import wraps
 from http import HTTPStatus
-from random import uniform
 
 import httpx
 
@@ -168,7 +168,8 @@ def retry(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         attempt = 1
-        delay = uniform(0, yajaw.DELAY)
+        random_generator = secrets.SystemRandom()
+        delay = random_generator.uniform(0, yajaw.DELAY)
         while attempt <= yajaw.TRIES:
             await asyncio.sleep(delay)
             result: httpx.Response = await func(*args, **kwargs)
