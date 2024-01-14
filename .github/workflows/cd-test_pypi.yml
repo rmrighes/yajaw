@@ -9,7 +9,7 @@
 name: Upload Python Package to TestPyPi
 
 on: 
-  push
+  workflow_dispatch
 
 permissions:
   contents: read
