@@ -1,6 +1,11 @@
 name: Static Code Analysis
 
-on: [push]
+on:
+  pull_request:
+    types:
+      [opened, reopened]
+    branches:
+      - master
 
 jobs:
   static-code-analyzers:

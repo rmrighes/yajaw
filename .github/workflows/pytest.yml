@@ -1,6 +1,11 @@
 name: Pytest
 
-on: [push]
+on:
+  pull_request:
+    types:
+      [opened, reopened]
+    branches:
+      - master
 
 jobs:
   pytest:
