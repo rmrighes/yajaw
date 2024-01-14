@@ -7,11 +7,15 @@ global configuration settings."""
 import asyncio
 import logging
 import tomllib
+from enum import Enum
 from pathlib import Path
 
-__all__ = ["jira"]
+__all__ = ["jira", "ApiType"]
 
 SEM_LIMIT = 5
+
+ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
+
 
 def load_settings_from_file() -> dict:
     """Load configuration settings from file"""

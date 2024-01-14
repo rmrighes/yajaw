@@ -10,14 +10,14 @@ msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 [retries]
 tries = 10
-delay = 0.1
-backoff = 1.8
+delay = 0.0
+backoff = 2
 
 [requests]
 timeout = 60
 
 [concurrency]
-semaphore_limit = 30
+semaphore_limit = 50
 
 [pagination]
-page_results = 20
+page_results = 40

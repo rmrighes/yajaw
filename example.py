@@ -1,12 +1,12 @@
-'''TBD'''
+"""TBD"""
 import asyncio
 
-from yajaw import jira
+from yajaw import ApiType, jira
 from yajaw.utils.decorators import duration
 
 
 async def async_main():
-    '''TBD'''
+    """TBD"""
     await use_async_fetch_all_projects()
     print()
     await use_async_fetch_projects()
@@ -15,12 +15,18 @@ async def async_main():
     print()
     await use_async_fetch_issue()
     print()
+    await use_async_fetch_issue_from_agile()
+    print()
     await use_async_search_issues()
+    print()
+    # await use_async_fetch_sprints()
+    # print()
+    # await use_async_fetch_issues_from_sprints()
 
 
 @duration
 async def use_async_fetch_all_projects():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT")
     projects = await jira.async_fetch_all_projects()
     if projects:
@@ -33,7 +39,7 @@ async def use_async_fetch_all_projects():
 
 @duration
 async def use_async_fetch_projects():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT/{KEY}")
     project = await jira.async_fetch_project(project_key="EMI")
     if project:
@@ -44,7 +50,7 @@ async def use_async_fetch_projects():
 
 @duration
 async def use_async_fetch_projects_from_list():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: PROJECT FROM LIST")
     project_keys = ["ETOE", "ESTT", "EMI"]
     projects = await jira.async_fetch_projects_from_list(project_keys=project_keys)
@@ -58,7 +64,7 @@ async def use_async_fetch_projects_from_list():
 
 @duration
 async def use_async_fetch_issue():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: ISSUE/{KEY}")
     issue = await jira.async_fetch_issue(issue_key="ETOE-8")
     if issue:
@@ -68,8 +74,24 @@ async def use_async_fetch_issue():
 
 
 @duration
+async def use_async_fetch_issue_from_agile():
+    """TBD"""
+    print("ASYNC AGILE RESOURCE: ISSUE/{KEY}")
+    issue = await jira.async_fetch_issue(
+        issue_key="MLOPS-8724", agile=ApiType.AGILE, expand="changelog"
+    )
+    if issue:
+        # story_points = "customfield_10012"
+        print(f"Issue key: {issue['key']}")
+        print(f"Estimate: {issue['fields']['customfield_10012']}")
+        print(f"Sprint: {issue['fields']['sprint']["name"]}")
+    else:
+        print("empty dictionary!")
+
+
+@duration
 async def use_async_search_issues():
-    '''TBD'''
+    """TBD"""
     print("ASYNC RESOURCE: SEARCH")
     jql = "project in (ETOE, ESTT, EMI, MLOPS)"
     issues = await jira.async_search_issues(jql=jql)
@@ -81,8 +103,21 @@ async def use_async_search_issues():
         print("empty list!")
 
 
+@duration
+async def use_async_fetch_sprints():
+    """TBD"""
+    print("ASYNC RESOURCE: sprint")
+    ...
+
+
+@duration
+async def use_async_fetch_issues_from_sprints():
+    """TBD"""
+    ...
+
+
 def sync_main():
-    '''TBD'''
+    """TBD"""
     use_fetch_all_projects()
     print()
     use_fetch_projects()
@@ -91,12 +126,18 @@ def sync_main():
     print()
     use_fetch_issue()
     print()
+    use_fetch_issue_from_agile()
+    print()
     use_search_issues()
+    print()
+    # use_fetch_sprints()
+    # print()
+    # use_fetch_issues_from_sprints()
 
 
 @duration
 def use_fetch_all_projects():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT")
     projects = jira.fetch_all_projects()
     if projects:
@@ -109,7 +150,7 @@ def use_fetch_all_projects():
 
 @duration
 def use_fetch_projects():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT/{KEY}")
     project = jira.fetch_project(project_key="EMI")
     if project:
@@ -120,7 +161,7 @@ def use_fetch_projects():
 
 @duration
 def use_fetch_projects_from_list():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: PROJECT FROM LIST")
     project_keys = ["ETOE", "ESTT", "EMI"]
     projects = jira.fetch_projects_from_list(project_keys=project_keys)
@@ -134,7 +175,7 @@ def use_fetch_projects_from_list():
 
 @duration
 def use_fetch_issue():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: ISSUE/{KEY}")
     issue = jira.fetch_issue(issue_key="ETOE-8")
     if issue:
@@ -144,8 +185,22 @@ def use_fetch_issue():
 
 
 @duration
+def use_fetch_issue_from_agile():
+    """TBD"""
+    print("ASYNC AGILE RESOURCE: ISSUE/{KEY}")
+    issue = jira.fetch_issue(issue_key="MLOPS-8730", expand="changelog", agile=ApiType.AGILE)
+    if issue:
+        # story_points = "customfield_10012"
+        print(f"Issue key: {issue['key']}")
+        print(f"Estimate: {issue['fields']['customfield_10012']}")
+        print(f"Sprint: {issue['fields']['sprint']["name"]}")
+    else:
+        print("empty dictionary!")
+
+
+@duration
 def use_search_issues():
-    '''TBD'''
+    """TBD"""
     print("RESOURCE: SEARCH")
     jql = "project in (ETOE, ESTT, EMI, MLOPS)"
     issues = jira.search_issues(jql=jql)
@@ -157,8 +212,21 @@ def use_search_issues():
         print("empty list!")
 
 
+@duration
+def use_fetch_sprints():
+    """TBD"""
+    print("ASYNC RESOURCE: sprint")
+    ...
+
+
+@duration
+def use_fetch_issues_from_sprints():
+    """TBD"""
+    ...
+
+
 if __name__ == "__main__":
-    CONCURRENT = False
+    CONCURRENT = True
 
     if not CONCURRENT:
         sync_main()
