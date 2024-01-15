@@ -22,19 +22,19 @@ class PersonalAccessTokenAuth(httpx.Auth):
         yield request
 
 
-def generate_headers() -> dict[str]:
+def _generate_headers() -> dict[str]:
     """Function responsible for generating the headers info for HTTP requests."""
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
+def _generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
     return existing_params | new_params
 
 
-def generate_payload(
+def _generate_payload(
     new_content: dict[str], existing_content: dict[str] | None = None
 ) -> dict[str]:
     """Function responsible for generating the payload info for HTTP requests."""
@@ -43,21 +43,21 @@ def generate_payload(
     return existing_content | new_content
 
 
-def generate_url(resource: str, api: str) -> str:
+def _generate_url(resource: str, api: str) -> str:
     """Function responsible for generating the url info for HTTP requests."""
     return f"{yajaw.JIRA_BASE_URL}/{api}/{resource}"
 
 
-def generate_auth() -> PersonalAccessTokenAuth:
+def _generate_auth() -> PersonalAccessTokenAuth:
     """Function responsible for generating the authentication info for HTTP requests."""
     return PersonalAccessTokenAuth(yajaw.JIRA_PAT)
 
 
-def generate_client() -> httpx.AsyncClient:
+def _generate_client() -> httpx.AsyncClient:
     """Function responsible for generating the client used in the context for HTTP requests."""
     return httpx.AsyncClient(
-        auth=generate_auth(),
-        headers=generate_headers(),
+        auth=_generate_auth(),
+        headers=_generate_headers(),
         timeout=yajaw.TIMEOUT,
         follow_redirects=True,
     )
@@ -73,7 +73,7 @@ class JiraInfo:
         self.__method = info["method"]
         self.__resource = info["resource"]
         self.__api = info["api"]
-        self.__url = generate_url(resource=info["resource"], api=info["api"])
+        self.__url = _generate_url(resource=info["resource"], api=info["api"])
         self.__params = info["params"]
         self.__payload = info["payload"]
 
@@ -138,7 +138,7 @@ class JiraInfo:
         self.__payload = pad
 
 
-def retry_response_error_detected(result: httpx.Response) -> bool:
+def _retry_response_error_detected(result: httpx.Response) -> bool:
     """TBD"""
     proceed: bool = True
 
@@ -173,7 +173,7 @@ def retry(func):
         while attempt <= yajaw.TRIES:
             await asyncio.sleep(delay)
             result: httpx.Response = await func(*args, **kwargs)
-            if not retry_response_error_detected(result):
+            if not _retry_response_error_detected(result):
                 yajaw.LOGGER.info(
                     f"{result.status_code} - attempt {attempt:02d} - "
                     f"delay {delay:04.2f}s -- {result.request.method} "
@@ -198,7 +198,7 @@ def retry(func):
 
 
 @retry
-async def send_request(jira: JiraInfo, client: httpx.AsyncClient) -> httpx.Response:
+async def _send_request(jira: JiraInfo, client: httpx.AsyncClient) -> httpx.Response:
     """Function responsible for making a low level HTTP request."""
     method = jira.method
     url = jira.url
@@ -214,8 +214,8 @@ async def send_single_request(
     """Function wraps send_request and returns a list of responses."""
     try:
         if client is None:
-            client = generate_client()
-        task = asyncio.create_task(send_request(jira=jira, client=client))
+            client = _generate_client()
+        task = asyncio.create_task(_send_request(jira=jira, client=client))
         response = await task
     except exceptions.ResourceNotFoundError as exc:
         yajaw.LOGGER.warning("pending log message -- send_single_request")
@@ -229,10 +229,10 @@ async def send_single_request(
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """Function that wraps send_single_request and and call it for all necessary pages."""
     default_page_attr = yajaw.DEFAULT_PAGINATION
-    jira_list = create_jira_list_with_page_attr(page_attr_list=[default_page_attr], jira=jira)
+    jira_list = _create_jira_list_with_page_attr(page_attr_list=[default_page_attr], jira=jira)
     initial_jira = jira_list[0]
 
-    client = generate_client()
+    client = _generate_client()
     async with client:
         # First request with default pagination
         response = await send_single_request(jira=initial_jira, client=client)
@@ -241,13 +241,13 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
         responses.append(response)
 
         # Identify if additional requests are needed
-        page_attr = retrieve_pagination_attributes(response=response)
-        if is_pagination_required(page_attr=page_attr):
+        page_attr = _retrieve_pagination_attributes(response=response)
+        if _is_pagination_required(page_attr=page_attr):
             # Generate the updated page_attr_list
-            page_attr_list = create_list_of_page_attr(page_attr=page_attr)
+            page_attr_list = _create_list_of_page_attr(page_attr=page_attr)
 
             # Generate the updated jira_list
-            jira_list = create_jira_list_with_page_attr(page_attr_list=page_attr_list, jira=jira)
+            jira_list = _create_jira_list_with_page_attr(page_attr_list=page_attr_list, jira=jira)
 
             # Create concurrent requests for the additional pages
             # iterate over jira_list
@@ -265,7 +265,7 @@ async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     return responses
 
 
-def create_list_of_page_attr(page_attr: dict) -> list[dict]:
+def _create_list_of_page_attr(page_attr: dict) -> list[dict]:
     """Function that generates a list of attributes needed to retrieve all pages."""
     if "total" not in page_attr:
         return [page_attr]
@@ -279,7 +279,7 @@ def create_list_of_page_attr(page_attr: dict) -> list[dict]:
     return [{"startAt": page, "maxResults": page_attr["max_results"]} for page in page_attr_list]
 
 
-def create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) -> list[JiraInfo]:
+def _create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) -> list[JiraInfo]:
     """Function that gets a list of page attributes and createa
     a list with respective JiraInfo objects."""
     jira_list = []
@@ -292,11 +292,11 @@ def create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) 
             "payload": jira.payload,
         }
         if unique_info["method"] == "GET":
-            unique_info["params"] = generate_params(
+            unique_info["params"] = _generate_params(
                 new_params=page_attr, existing_params=unique_info["params"]
             )
         if unique_info["method"] == "POST":
-            unique_info["payload"] = generate_payload(
+            unique_info["payload"] = _generate_payload(
                 new_content=page_attr, existing_content=unique_info["payload"]
             )
         unique_jira = JiraInfo(info=unique_info)
@@ -304,7 +304,7 @@ def create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) 
     return jira_list
 
 
-def retrieve_pagination_attributes(response: httpx.Response) -> dict:
+def _retrieve_pagination_attributes(response: httpx.Response) -> dict:
     """TBD"""
     page_attr = {}
     response_json = response.json()
@@ -316,7 +316,7 @@ def retrieve_pagination_attributes(response: httpx.Response) -> dict:
     return page_attr
 
 
-def is_pagination_required(page_attr: dict) -> bool:
+def _is_pagination_required(page_attr: dict) -> bool:
     """Function that checks if pagination is required."""
     start_at = page_attr["start_at"]
     max_results = page_attr["max_results"]

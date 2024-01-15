@@ -107,13 +107,13 @@ async def use_async_search_issues():
 async def use_async_fetch_sprints():
     """TBD"""
     print("ASYNC RESOURCE: sprint")
-    ...
+    # Continue implementation
 
 
 @duration
 async def use_async_fetch_issues_from_sprints():
     """TBD"""
-    ...
+    # Continue implementation
 
 
 def sync_main():
@@ -216,13 +216,13 @@ def use_search_issues():
 def use_fetch_sprints():
     """TBD"""
     print("ASYNC RESOURCE: sprint")
-    ...
+    # Continue implementation
 
 
 @duration
 def use_fetch_issues_from_sprints():
     """TBD"""
-    ...
+    # Continue implementation
 
 
 if __name__ == "__main__":

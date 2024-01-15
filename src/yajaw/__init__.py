@@ -3,60 +3,25 @@
 # SPDX-License-Identifier: MIT
 """File __init__.py responsible for enabling the import of yajaw package and
 global configuration settings."""
-
-import asyncio
-import logging
-import tomllib
 from enum import Enum
-from pathlib import Path
 
-__all__ = ["jira", "ApiType"]
+from yajaw.configuration import initialize_configuration
 
-SEM_LIMIT = 5
+__all__ = ["jira", "configuration", "ApiType"]
 
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 
+app_config = initialize_configuration()
 
-def load_settings_from_file() -> dict:
-    """Load configuration settings from file"""
-    fname = "yajaw.toml"
-    with open(Path.home() / ".yajaw" / fname, "rb") as toml:
-        return tomllib.load(toml)
-
-
-def define_logger(config: dict):
-    """Configure the global settings for logging."""
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.basicConfig(level=logging.INFO, format=config["log"]["msg_format"])
-    return logging.getLogger(__package__)
-
-
-def initialize_configuration() -> dict:
-    """Creates the global configuration based on environment."""
-    config = load_settings_from_file()
-    config["log"]["logger"] = define_logger(config)
-    limit = config["concurrency"]["semaphore_limit"]
-    # Ensures a minimum value of 5 for the BoundedSemaphore
-    semaphore_limit = limit if limit > SEM_LIMIT else SEM_LIMIT
-    config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(semaphore_limit)
-    config["pagination"]["default"] = {
-        "startAt": 0,
-        "maxResults": config["pagination"]["page_results"],
-    }
-    return config
-
-
-CONFIG = initialize_configuration()
-
-TRIES = CONFIG["retries"]["tries"]
-DELAY = CONFIG["retries"]["delay"]
-BACKOFF = CONFIG["retries"]["backoff"]
-LOGGER = CONFIG["log"]["logger"]
-SEMAPHORE = CONFIG["concurrency"]["semaphore"]
-JIRA_PAT = CONFIG["jira"]["token"]
-JIRA_BASE_URL = CONFIG["jira"]["base_url"]
-SERVER_API = CONFIG["jira"]["server_api_v2"]
-AGILE_API = CONFIG["jira"]["agile_api_v1"]
-GREENHOPPER_API = CONFIG["jira"]["greenhopper_api"]
-DEFAULT_PAGINATION = CONFIG["pagination"]["default"]
-TIMEOUT = CONFIG["requests"]["timeout"]
+TRIES = app_config["retries"]["tries"]
+DELAY = app_config["retries"]["delay"]
+BACKOFF = app_config["retries"]["backoff"]
+LOGGER = app_config["log"]["logger"]
+SEMAPHORE = app_config["concurrency"]["semaphore"]
+JIRA_PAT = app_config["jira"]["token"]
+JIRA_BASE_URL = app_config["jira"]["base_url"]
+SERVER_API = app_config["jira"]["server_api_v2"]
+AGILE_API = app_config["jira"]["agile_api_v1"]
+GREENHOPPER_API = app_config["jira"]["greenhopper_api"]
+DEFAULT_PAGINATION = app_config["pagination"]["default"]
+TIMEOUT = app_config["requests"]["timeout"]
