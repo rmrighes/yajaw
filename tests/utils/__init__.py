@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: MIT
 """File __init__.py responsible for enabling the import of yajaw.core package."""
 
-__all__ = []
+__all__ = ["test_decorators"]
