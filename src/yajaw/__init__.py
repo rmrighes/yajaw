@@ -5,13 +5,13 @@
 global configuration settings."""
 from enum import Enum
 
-from yajaw.configuration import initialize_configuration
+from yajaw import configuration
 
 __all__ = ["jira", "configuration", "ApiType"]
 
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 
-app_config = initialize_configuration()
+app_config = configuration.initialize_configuration()
 
 TRIES = app_config["retries"]["tries"]
 DELAY = app_config["retries"]["delay"]

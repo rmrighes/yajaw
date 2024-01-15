@@ -4,8 +4,8 @@ from unittest.mock import patch
 import httpx
 import pytest
 
+from yajaw import jira
 from yajaw.core import exceptions as e
-from yajaw.jira import fetch_project
 
 #########
 # MOCK!!!
@@ -58,7 +58,7 @@ def test_fetch_single_valid_issue(mock_rest_request):
     """Test fetch_project() with a single valid issue."""
     mock_response = fetch_single_mock_valid_issue()
     mock_rest_request.return_value = mock_response
-    response = fetch_project("VALID")
+    response = jira.fetch_project("VALID")
     assert isinstance(response, dict)
     assert response["key"] == "VALID"
 
@@ -71,4 +71,4 @@ def test_fetch_single_issue_with_server_not_found(mock_rest_request, mock_sleep)
     mock_rest_request.return_value = mock_value
     mock_sleep.return_value = None
     with pytest.raises(e.YajawError):
-        fetch_project("INVALID-KEY")
+        jira.fetch_project("INVALID-KEY")
