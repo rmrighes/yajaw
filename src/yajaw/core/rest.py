@@ -7,7 +7,7 @@ from http import HTTPStatus
 
 import httpx
 
-import yajaw
+from yajaw import YajawConfig
 from yajaw.core import exceptions
 
 
@@ -45,12 +45,12 @@ def _generate_payload(
 
 def _generate_url(resource: str, api: str) -> str:
     """Function responsible for generating the url info for HTTP requests."""
-    return f"{yajaw.JIRA_BASE_URL}/{api}/{resource}"
+    return f"{YajawConfig.JIRA_BASE_URL}/{api}/{resource}"
 
 
 def _generate_auth() -> PersonalAccessTokenAuth:
     """Function responsible for generating the authentication info for HTTP requests."""
-    return PersonalAccessTokenAuth(yajaw.JIRA_PAT)
+    return PersonalAccessTokenAuth(YajawConfig.JIRA_PAT)
 
 
 def _generate_client() -> httpx.AsyncClient:
@@ -58,7 +58,7 @@ def _generate_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         auth=_generate_auth(),
         headers=_generate_headers(),
-        timeout=yajaw.TIMEOUT,
+        timeout=YajawConfig.TIMEOUT,
         follow_redirects=True,
     )
 
@@ -143,19 +143,19 @@ def _retry_response_error_detected(result: httpx.Response) -> bool:
     proceed: bool = True
 
     if not isinstance(result, httpx.Response):
-        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
+        YajawConfig.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.InvalidResponseError
     if result.status_code == HTTPStatus.UNAUTHORIZED:
-        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
+        YajawConfig.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceUnauthorizedError
     if result.status_code == HTTPStatus.FORBIDDEN:
-        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
+        YajawConfig.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceForbiddenError
     if result.status_code == HTTPStatus.NOT_FOUND:
-        yajaw.LOGGER.warning("AAApending log message -- no_retry_response_error_detected")
+        YajawConfig.LOGGER.warning("AAApending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceNotFoundError
     if result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
-        yajaw.LOGGER.error("pending log message -- no_retry_response_error_detected")
+        YajawConfig.LOGGER.error("pending log message -- no_retry_response_error_detected")
         raise exceptions.ResourceMethodNotAllowedError
     if httpx.codes.is_success(result.status_code):
         proceed = False
@@ -169,25 +169,25 @@ def retry(func):
     async def wrapper(*args, **kwargs):
         attempt = 1
         random_generator = secrets.SystemRandom()
-        delay = random_generator.uniform(0, yajaw.DELAY)
-        while attempt <= yajaw.TRIES:
+        delay = random_generator.uniform(0, YajawConfig.DELAY)
+        while attempt <= YajawConfig.TRIES:
             await asyncio.sleep(delay)
             result: httpx.Response = await func(*args, **kwargs)
             if not _retry_response_error_detected(result):
-                yajaw.LOGGER.info(
+                YajawConfig.LOGGER.info(
                     f"{result.status_code} - attempt {attempt:02d} - "
                     f"delay {delay:04.2f}s -- {result.request.method} "
                     f"{result.request.url}"
                 )
                 return result
-            yajaw.LOGGER.info(
+            YajawConfig.LOGGER.info(
                 f"{result.status_code} - attempt {attempt:02d} - "
                 f"delay {delay:04.2f}s -- {result.request.method} "
                 f"{result.request.url}"
             )
             attempt += 1
-            delay *= yajaw.BACKOFF
-        yajaw.LOGGER.error(
+            delay *= YajawConfig.BACKOFF
+        YajawConfig.LOGGER.error(
             f"{result.status_code} - attempt {attempt:02d} - "
             f"delay {delay:04.2f}s -- {result.request.method} "
             f"{result.request.url}"
@@ -204,7 +204,7 @@ async def _send_request(jira: JiraInfo, client: httpx.AsyncClient) -> httpx.Resp
     url = jira.url
     params = jira.params
     payload = jira.payload
-    async with yajaw.SEMAPHORE:
+    async with YajawConfig.SEMAPHORE:
         return await client.request(method=method, url=url, params=params, json=payload)
 
 
@@ -218,17 +218,17 @@ async def send_single_request(
         task = asyncio.create_task(_send_request(jira=jira, client=client))
         response = await task
     except exceptions.ResourceNotFoundError as exc:
-        yajaw.LOGGER.warning("pending log message -- send_single_request")
+        YajawConfig.LOGGER.warning("pending log message -- send_single_request")
         raise exceptions.ResourceNotFoundError from exc
     except exceptions.YajawError as e:
-        yajaw.LOGGER.exception("pending log message -- send_single_request")
+        YajawConfig.LOGGER.exception("pending log message -- send_single_request")
         raise exceptions.YajawError from e
     return response
 
 
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """Function that wraps send_single_request and and call it for all necessary pages."""
-    default_page_attr = yajaw.DEFAULT_PAGINATION
+    default_page_attr = YajawConfig.DEFAULT_PAGINATION
     jira_list = _create_jira_list_with_page_attr(page_attr_list=[default_page_attr], jira=jira)
     initial_jira = jira_list[0]
 

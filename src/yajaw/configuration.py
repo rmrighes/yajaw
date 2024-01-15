@@ -3,77 +3,87 @@ import asyncio
 import logging
 import tomllib
 from pathlib import Path
-
-import yajaw
-
-MIN_SEMAPHORE_LIMIT = 5
+from typing import ClassVar
 
 
-def _load_settings() -> dict:
-    """Load configuration settings from file"""
-    fname = "yajaw.toml"
-    try:
-        with open(Path.home() / ".yajaw" / fname, "rb") as toml:
-            return tomllib.load(toml)
-    except FileNotFoundError:
-        return _load_default_settings()
-
-
-def _load_default_settings() -> dict:
+class YajawConfig:
     """TBD"""
-    toml_str = """
-        [jira]
-        token = "AAA..."
-        base_url = "https://my-dummy-jira-url.com"
-        server_api_v2 = "rest/api/2"
-        agile_api_v1 = "rest/agile/1.0"
-        greenhopper_api = "rest/greenhopper/1.0"
-        [log]
-        msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        [retries]
-        tries = 10
-        delay = 0.0
-        backoff = 2
-        [requests]
-        timeout = 60
-        [concurrency]
-        semaphore_limit = 50
-        [pagination]
-        page_results = 40
-    """
-    return tomllib.loads(toml_str)
 
+    _MIN_SEMAPHORE_LIMIT = 5
 
-def _define_logger(config: dict):
-    """Configure the global settings for logging."""
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.basicConfig(level=logging.INFO, format=config["log"]["msg_format"])
-    return logging.getLogger(__package__)
-
-
-def initialize_configuration() -> dict:
-    """Creates the global configuration based on environment."""
-    config = _load_settings()
-    config["log"]["logger"] = _define_logger(config)
-    limit = config["concurrency"]["semaphore_limit"]
-    # Ensures a minimum value of 5 for the BoundedSemaphore
-    semaphore_limit = limit if limit > MIN_SEMAPHORE_LIMIT else MIN_SEMAPHORE_LIMIT
-    config["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(semaphore_limit)
-    config["pagination"]["default"] = {
-        "startAt": 0,
-        "maxResults": config["pagination"]["page_results"],
+    __conf: ClassVar = {
+        "jira": {
+            "token": "AAA...",
+            "base_url": "https://my-dummy-jira-url.com",
+            "server_api_v2": "rest/api/2",
+            "agile_api_v1": "rest/agile/1.0",
+            "greenhopper_api": "rest/greenhopper/1.0",
+        },
+        "log": {"msg_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"},
+        "retries": {"tries": 10, "delay": 0.0, "backoff": 2},
+        "requests": {"timeout": 60},
+        "concurrency": {"semaphore_limit": 50},
+        "pagination": {"page_results": 40},
     }
-    return config
 
+    __sections: ClassVar = ["jira", "log", "retries", "requests", "concurrency"]
 
-# Override Jira connection configurations
+    @staticmethod
+    def configuration(section, setting):
+        """TBD"""
+        return YajawConfig.__conf[section][setting]
 
+    @staticmethod
+    def update_configuration(section, setting, value):
+        """TBD"""
+        if section in YajawConfig.__sections:
+            YajawConfig.__conf[section][setting] = value
+        else:
+            raise NameError
 
-def set_user_token(token: str) -> None:
-    """TBD"""
-    yajaw.JIRA_PAT = token
+    @staticmethod
+    def load_settings():
+        """Load configuration settings from file"""
+        fname = "yajaw.toml"
+        try:
+            with open(Path.home() / ".yajaw" / fname, "rb") as toml:
+                YajawConfig.__conf = tomllib.load(toml)
+        except FileNotFoundError:
+            ...
+        YajawConfig.__conf["log"]["logger"] = YajawConfig.define_logger()
+        limit = YajawConfig.__conf["concurrency"]["semaphore_limit"]
+        # Ensures da minimum value of 5 for the BoundedSemaphore
+        semaphore_limit = (
+            limit if limit > YajawConfig._MIN_SEMAPHORE_LIMIT else YajawConfig._MIN_SEMAPHORE_LIMIT
+        )
+        YajawConfig.__conf["concurrency"]["semaphore"] = asyncio.BoundedSemaphore(semaphore_limit)
+        YajawConfig.__conf["pagination"]["default"] = {
+            "startAt": 0,
+            "maxResults": YajawConfig.__conf["pagination"]["page_results"],
+        }
+        YajawConfig.set_class_variables()
 
+    @staticmethod
+    def define_logger():
+        """Configure the global settings for logging."""
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.basicConfig(level=logging.INFO, format=YajawConfig.__conf["log"]["msg_format"])
+        return logging.getLogger(__package__)
 
-def set_jira_base_url(base_url: str) -> None:
-    """TBD"""
-    yajaw.JIRA_BASE_URL = base_url
+    @staticmethod
+    def set_class_variables():
+        """TBD"""
+        YajawConfig.JIRA_PAT = YajawConfig.__conf["jira"]["token"]
+        YajawConfig.JIRA_BASE_URL = YajawConfig.__conf["jira"]["base_url"]
+        YajawConfig.SERVER_API_V2 = YajawConfig.__conf["jira"]["server_api_v2"]
+        YajawConfig.SERVER_API = YajawConfig.SERVER_API_V2
+        YajawConfig.AGILE_API_V1 = YajawConfig.__conf["jira"]["agile_api_v1"]
+        YajawConfig.AGILE_API = YajawConfig.AGILE_API_V1
+        YajawConfig.GREENHOPPER_API = YajawConfig.__conf["jira"]["greenhopper_api"]
+        YajawConfig.TRIES = YajawConfig.__conf["retries"]["tries"]
+        YajawConfig.DELAY = YajawConfig.__conf["retries"]["delay"]
+        YajawConfig.BACKOFF = YajawConfig.__conf["retries"]["backoff"]
+        YajawConfig.LOGGER = YajawConfig.__conf["log"]["logger"]
+        YajawConfig.SEMAPHORE = YajawConfig.__conf["concurrency"]["semaphore"]
+        YajawConfig.TIMEOUT = YajawConfig.__conf["requests"]["timeout"]
+        YajawConfig.DEFAULT_PAGINATION = YajawConfig.__conf["pagination"]["default"]

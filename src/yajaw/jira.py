@@ -1,8 +1,7 @@
 """TBD"""
 import asyncio
 
-import yajaw
-from yajaw import ApiType
+from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
 from yajaw.core import rest
 
@@ -14,7 +13,7 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
     info = {
         "method": "GET",
         "resource": "project",
-        "api": yajaw.SERVER_API,
+        "api": YajawConfig.SERVER_API,
         "params": expand,
         "payload": None,
     }
@@ -42,7 +41,7 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
     info = {
         "method": "GET",
         "resource": f"project/{project_key}",
-        "api": yajaw.SERVER_API,
+        "api": YajawConfig.SERVER_API,
         "params": expand,
         "payload": None,
     }
@@ -73,7 +72,7 @@ async def async_fetch_projects_from_list(
         {
             "method": "GET",
             "resource": f"project/{project_key}",
-            "api": yajaw.SERVER_API,
+            "api": YajawConfig.SERVER_API,
             "params": expand,
             "payload": None,
         }
@@ -103,7 +102,7 @@ async def async_fetch_issue(
     """TBD"""
     expand = {} if expand is None else {"expand": expand}
 
-    api = yajaw.SERVER_API if not agile else yajaw.AGILE_API
+    api = YajawConfig.SERVER_API if not agile else YajawConfig.AGILE_API
 
     info = {
         "method": "GET",
@@ -139,7 +138,7 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
     info = {
         "method": "POST",
         "resource": "search",
-        "api": yajaw.SERVER_API,
+        "api": YajawConfig.SERVER_API,
         "params": expand,
         "payload": query,
     }
