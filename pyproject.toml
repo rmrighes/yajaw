@@ -37,6 +37,7 @@ python = "3.12"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "pytest-asyncio",
   "pylint",
   "bandit"
 ]

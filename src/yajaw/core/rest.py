@@ -2,12 +2,11 @@
 import asyncio
 import math
 import secrets
-from functools import wraps
 from http import HTTPStatus
 
 import httpx
 
-from yajaw import YajawConfig
+from yajaw import Option, YajawConfig
 from yajaw.core import exceptions
 
 
@@ -140,54 +139,57 @@ class JiraInfo:
 
 def _retry_response_error_detected(result: httpx.Response) -> bool:
     """Check if a retry should proceed based on the HTTP response."""
+    retry = True
     if not isinstance(result, httpx.Response):
-        log_and_raise_request_issue("InvalidResponseError")
-    elif result.status_code == HTTPStatus.UNAUTHORIZED:
-        log_and_raise_request_issue(f"ResourceUnauthorizedError")
-    elif result.status_code == HTTPStatus.FORBIDDEN:
-        log_and_raise_request_issue("ResourceForbiddenError")
-    elif result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
-        log_and_raise_request_issue("ResourceMethodNotAllowedError")    
-    elif result.status_code == HTTPStatus.NOT_FOUND:
-        log_and_raise_request_issue("ResourceNotFoundError")
-    else:
-        return False
-    return True
+        _log_and_raise_request_issue("InvalidResponseError")
+    if result.status_code == HTTPStatus.UNAUTHORIZED:
+        _log_and_raise_request_issue("ResourceUnauthorizedError")
+    if result.status_code == HTTPStatus.FORBIDDEN:
+        _log_and_raise_request_issue("ResourceForbiddenError")
+    if result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
+        _log_and_raise_request_issue("ResourceMethodNotAllowedError")
+    if result.status_code == HTTPStatus.NOT_FOUND:
+        _log_and_raise_request_issue("ResourceNotFoundError")
+    if httpx.codes.is_success(result.status_code):
+        retry = False
+    return retry
 
 
-def log_and_raise_request_issue(error_type: str, warning: bool = False) -> None:
+def _log_and_raise_request_issue(error_type: str, warning: Option = Option.NO) -> None:
     """Log an error or warning message and raise the specified exception."""
-    log_level = YajawConfig.LOGGER.warning if warning else YajawConfig.LOGGER.error
+    log_level = YajawConfig.LOGGER.warning if warning is Option.YES else YajawConfig.LOGGER.error
     log_message = f"log message -- {error_type}"
     log_level(log_message)
     raise getattr(exceptions, error_type)
 
+
 async def _retry_request(jira: JiraInfo, client: httpx.AsyncClient):
     """Retry the given function on certain conditions."""
+    delay = secrets.SystemRandom().uniform(0, YajawConfig.DELAY)
     for attempt in range(1, YajawConfig.TRIES + 1):
-        delay = secrets.SystemRandom().uniform(0, YajawConfig.DELAY)
         await asyncio.sleep(delay)
         result = await _send_request(jira=jira, client=client)
         _log_attempt_info(result, attempt, delay)
         if not _retry_response_error_detected(result):
             return result
+        delay *= YajawConfig.BACKOFF
     _log_attempt_info(result, attempt, delay, error=True)
     raise exceptions.InvalidResponseError
 
 
-def _log_attempt_info(result, attempt, delay, error: bool = False):
+def _log_attempt_info(result, attempt, delay, error: Option = Option.NO):
     """Log information for a retry attempt."""
-    log_level = YajawConfig.LOGGER.error if error else YajawConfig.LOGGER.info
-    
+    log_level = YajawConfig.LOGGER.error if error == Option.YES else YajawConfig.LOGGER.info
+
     if isinstance(result, httpx.Response):
         log_message = (
             f"{result.status_code} - attempt {attempt:02d} - "
-            f"delay {delay:04.2f}s -- {result.request.method} "
+            f"delay {delay:05.2f}s -- {result.request.method} "
             f"{result.request.url}"
         )
     else:
         log_message = f"Non-HTTPX response - attempt {attempt:02d} - delay {delay:04.2f}s"
-    
+
     log_level(log_message)
 
 
