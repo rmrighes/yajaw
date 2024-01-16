@@ -142,8 +142,12 @@ def _retry_response_error_detected(result: httpx.Response) -> bool:
     """Check if a retry should proceed based on the HTTP response."""
     if not isinstance(result, httpx.Response):
         log_and_raise_request_issue("InvalidResponseError")
-    elif result.status_code in {HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN, HTTPStatus.METHOD_NOT_ALLOWED}:
-        log_and_raise_request_issue(f"Resource{result.status_code.name}Error")
+    elif result.status_code == HTTPStatus.UNAUTHORIZED:
+        log_and_raise_request_issue(f"ResourceUnauthorizedError")
+    elif result.status_code == HTTPStatus.FORBIDDEN:
+        log_and_raise_request_issue("ResourceForbiddenError")
+    elif result.status_code == HTTPStatus.METHOD_NOT_ALLOWED:
+        log_and_raise_request_issue("ResourceMethodNotAllowedError")    
     elif result.status_code == HTTPStatus.NOT_FOUND:
         log_and_raise_request_issue("ResourceNotFoundError")
     else:
@@ -154,7 +158,7 @@ def _retry_response_error_detected(result: httpx.Response) -> bool:
 def log_and_raise_request_issue(error_type: str, warning: bool = False) -> None:
     """Log an error or warning message and raise the specified exception."""
     log_level = YajawConfig.LOGGER.warning if warning else YajawConfig.LOGGER.error
-    log_message = f"{'AAApending ' if warning else ''}log message -- {error_type}"
+    log_message = f"log message -- {error_type}"
     log_level(log_message)
     raise getattr(exceptions, error_type)
 
