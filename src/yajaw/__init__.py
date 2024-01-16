@@ -11,5 +11,6 @@ from yajaw.configuration import YajawConfig
 __all__ = ["jira", "configuration", "ApiType"]
 
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
+Option = Enum("Confirmation", ["YES", "NO"])
 
 YajawConfig.load_settings()
