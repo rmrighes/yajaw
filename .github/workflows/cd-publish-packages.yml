@@ -46,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish to PyPi
     environment: pypi
+    needs: publish-to-testpypi
     permissions:
       contents: read
       id-token: write
