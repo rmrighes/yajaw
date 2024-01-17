@@ -3,11 +3,14 @@ name: Pytest
 on:
   pull_request:
     types:
-      [opened, reopened]
+      [opened, reopened, synchronize]
     branches:
+      - development
       - main
-      - staging
-      - production
+  push:
+    branches:
+      - 'features/**'
+      - 'fixes/**'
 
 jobs:
   pytest:
