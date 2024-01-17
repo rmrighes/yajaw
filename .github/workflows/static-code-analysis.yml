@@ -42,3 +42,6 @@ jobs:
     - name: Analysing the code with Bandit
       run: |
         hatch run static:security-check
+    - name: Analysing the code with mypy
+      run: |
+        hatch run static:type-check

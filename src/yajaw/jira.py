@@ -8,13 +8,13 @@ from yajaw.core import rest
 
 async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
     """TBD"""
-    expand = {} if expand is None else {"expand": expand}
+    expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
         "method": "GET",
         "resource": "project",
         "api": YajawConfig.SERVER_API,
-        "params": expand,
+        "params": expand_dict,
         "payload": None,
     }
 
@@ -36,13 +36,13 @@ def fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 async def async_fetch_project(project_key: str, expand: str | None = None) -> dict:
     """TBD"""
-    expand = {} if expand is None else {"expand": expand}
+    expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
         "method": "GET",
         "resource": f"project/{project_key}",
         "api": YajawConfig.SERVER_API,
-        "params": expand,
+        "params": expand_dict,
         "payload": None,
     }
 
@@ -64,16 +64,16 @@ def fetch_project(project_key: str, expand: str | None = None) -> dict:
 
 async def async_fetch_projects_from_list(
     project_keys: list[str], expand: str | None = None
-) -> dict:
+) -> list[dict]:
     """TBD"""
-    expand = {} if expand is None else {"expand": expand}
+    expand_dict = {} if expand is None else {"expand": expand}
 
     info_list = [
         {
             "method": "GET",
             "resource": f"project/{project_key}",
             "api": YajawConfig.SERVER_API,
-            "params": expand,
+            "params": expand_dict,
             "payload": None,
         }
         for project_key in project_keys
@@ -100,7 +100,7 @@ async def async_fetch_issue(
     issue_key: str, expand: str | None = None, agile: ApiType = ApiType.CLASSIC
 ) -> dict:
     """TBD"""
-    expand = {} if expand is None else {"expand": expand}
+    expand_dict = {} if expand is None else {"expand": expand}
 
     api = YajawConfig.SERVER_API if not agile else YajawConfig.AGILE_API
 
@@ -108,7 +108,7 @@ async def async_fetch_issue(
         "method": "GET",
         "resource": f"issue/{issue_key}",
         "api": api,
-        "params": expand,
+        "params": expand_dict,
         "payload": None,
     }
 
@@ -132,14 +132,14 @@ def fetch_issue(
 
 async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]:
     """TBD"""
-    expand = {} if expand is None else {"expand": expand}
+    expand_dict = {} if expand is None else {"expand": expand}
     query = {"jql": jql}
 
     info = {
         "method": "POST",
         "resource": "search",
         "api": YajawConfig.SERVER_API,
-        "params": expand,
+        "params": expand_dict,
         "payload": query,
     }
 
