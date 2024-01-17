@@ -13,10 +13,7 @@ from yajaw.core.exceptions import (
     ResourceNotFoundError,
     ResourceUnauthorizedError,
 )
-from yajaw.core.rest import (
-    _retry_request,
-    _retry_response_error_detected,
-)
+from yajaw.core.rest import _retry_request, _retry_response_error_detected
 
 
 @pytest.mark.asyncio

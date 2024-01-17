@@ -9,7 +9,7 @@ description = 'Yet Another Jira API Wrapper'
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-keywords = []
+keywords = ["jira", "api"]
 authors = [
   { name = "rmrighes", email = "rmrighes@users.noreply.github.com" },
 ]
@@ -38,9 +38,13 @@ dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
   "pytest-asyncio",
+  "mypy",
+  "black",
   "pylint",
-  "bandit"
+  "bandit",
+  "isort"
 ]
+
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
@@ -52,16 +56,18 @@ cov = [
   "test-cov",
   "cov-report",
 ]
+type-check = "mypy --install-types --non-interactive ."
+format-check = "black --diff ."
+formatter = "black ."
+isort-check = "isort --check-only --diff ."
+importsort = "isort ."
+linter-check = "pylint **/*.py"
+security-check = "bandit -r . -c 'pyproject.toml'"
+
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.11", "3.12"]
 
-[tool.hatch.envs.types]
-dependencies = [
-  "mypy>=1.0.0",
-]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/yajaw tests}"
 
 [tool.coverage.run]
 source_pkgs = ["yajaw", "tests"]
@@ -90,6 +96,15 @@ ignore = [
 ]
 output-format = "github"
 
+
 [tool.bandit]
-exclude_dirs = ["tests"]
-#skips = ["B311"]
+exclude_dirs = ["*.venv/*", "*/tests/*"]
+skips = ["B101"]
+
+
+[tool.black]
+line-length = 100
+
+
+[tool.isort]
+profile = "black"

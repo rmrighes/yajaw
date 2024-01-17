@@ -21,21 +21,19 @@ class PersonalAccessTokenAuth(httpx.Auth):
         yield request
 
 
-def _generate_headers() -> dict[str]:
+def _generate_headers() -> dict:
     """Function responsible for generating the headers info for HTTP requests."""
     return {"Accept": "application/json", "Content-Type": "application/json"}
 
 
-def _generate_params(new_params: dict[str], existing_params: dict[str] | None = None) -> dict[str]:
+def _generate_params(new_params: dict, existing_params: dict | None = None) -> dict:
     """Function responsible for generating the parameters info for HTTP requests."""
     if existing_params is None:
         existing_params = {}
     return existing_params | new_params
 
 
-def _generate_payload(
-    new_content: dict[str], existing_content: dict[str] | None = None
-) -> dict[str]:
+def _generate_payload(new_content: dict, existing_content: dict | None = None) -> dict:
     """Function responsible for generating the payload info for HTTP requests."""
     if existing_content is None:
         existing_content = {}
@@ -169,15 +167,15 @@ async def _retry_request(jira: JiraInfo, client: httpx.AsyncClient):
     for attempt in range(1, YajawConfig.TRIES + 1):
         await asyncio.sleep(delay)
         result = await _send_request(jira=jira, client=client)
-        _log_attempt_info(result, attempt, delay)
+        _log_attempt_info(result, attempt, delay, error=Option.NO)
         if not _retry_response_error_detected(result):
             return result
         delay *= YajawConfig.BACKOFF
-    _log_attempt_info(result, attempt, delay, error=True)
+    _log_attempt_info(result, attempt, delay, error=Option.YES)
     raise exceptions.InvalidResponseError
 
 
-def _log_attempt_info(result, attempt, delay, error: Option = Option.NO):
+def _log_attempt_info(result, attempt, delay, error=Option.NO):
     """Log information for a retry attempt."""
     log_level = YajawConfig.LOGGER.error if error == Option.YES else YajawConfig.LOGGER.info
 

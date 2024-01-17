@@ -9,7 +9,22 @@ from typing import ClassVar
 class YajawConfig:
     """TBD"""
 
-    _MIN_SEMAPHORE_LIMIT = 5
+    JIRA_PAT: str
+    JIRA_BASE_URL: str
+    SERVER_API_V2: str
+    SERVER_API: str
+    AGILE_API_V1: str
+    AGILE_API: str
+    GREENHOPPER_API: str
+    TRIES: int
+    DELAY: float
+    BACKOFF: float
+    LOGGER: logging.Logger
+    SEMAPHORE: asyncio.BoundedSemaphore
+    TIMEOUT: int
+    DEFAULT_PAGINATION: dict
+
+    _MIN_SEMAPHORE_LIMIT: int = 5
 
     __conf: ClassVar = {
         "jira": {
