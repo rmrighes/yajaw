@@ -26,13 +26,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint hatch
-    - name: Analysing the code with Pylint
-      run: |
-        hatch run pylint $(git ls-files 'src/*.py')
+        pip install hatch
     - name: Analysing the code with Ruff
       run: |
         hatch fmt --check
+    - name: Analysing the code with Pylint
+      run: |
+        hatch run static:linter-check
+    - name: Analysing the code with Black
+      run: |
+        hatch run static:format-check
+    - name: Analysing the code with isort
+      run: |
+        hatch run static:isort-check
     - name: Analysing the code with Bandit
       run: |
-        hatch run bandit -c pyproject.toml $(git ls-files 'src/*.py')
+        hatch run static:security-check
