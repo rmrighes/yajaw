@@ -32,16 +32,16 @@ jobs:
         hatch fmt --check
     - name: Analysing the code with Pylint
       run: |
-        hatch run static:linter-check
+        hatch run linter-check
     - name: Analysing the code with Black
       run: |
-        hatch run static:format-check
+        hatch run format-check
     - name: Analysing the code with isort
       run: |
-        hatch run static:isort-check
+        hatch run isort-check
     - name: Analysing the code with Bandit
       run: |
-        hatch run static:security-check
+        hatch run security-check
     - name: Analysing the code with mypy
       run: |
-        hatch run static:type-check
+        hatch run type-check

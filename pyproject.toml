@@ -64,24 +64,6 @@ importsort = "isort ."
 linter-check = "pylint **/*.py"
 security-check = "bandit -r . -c 'pyproject.toml'"
 
-[tool.hatch.envs.static]
-detached = true
-dependencies = [
-  "mypy",
-  "black",
-  "pylint",
-  "bandit",
-  "isort"
-]
-
-
-[tool.hatch.envs.static.scripts]
-type-check = "mypy --install-types --non-interactive ."
-format-check = "black --diff ."
-isort-check = "isort --check-only --diff ."
-linter-check = "pylint **/*.py"
-security-check = "bandit -r . -c 'pyproject.toml'"
-
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.11", "3.12"]
