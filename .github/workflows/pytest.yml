@@ -27,6 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint hatch
+        hatch run pip install --upgrade pip
     - name: Adding application's configuration file
       run: |
         mkdir ~/.yajaw
