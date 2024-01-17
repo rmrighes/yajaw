@@ -5,7 +5,9 @@ on:
     types:
       [opened, reopened]
     branches:
-      - master
+      - main
+      - staging
+      - production
 
 jobs:
   static-code-analyzers:
