@@ -85,7 +85,7 @@ async def use_async_fetch_issue_from_agile():
         # story_points = "customfield_10012"
         print(f"Issue key: {issue['key']}")
         print(f"Estimate: {issue['fields']['customfield_10012']}")
-        print(f"Sprint: {issue['fields']['sprint']['name']}")
+        print(*(sprint for sprint in issue["fields"]["customfield_10631"]), sep="\n")
     else:
         print("empty dictionary!")
 
@@ -194,7 +194,7 @@ def use_fetch_issue_from_agile():
         # story_points = "customfield_10012"
         print(f"Issue key: {issue['key']}")
         print(f"Estimate: {issue['fields']['customfield_10012']}")
-        print(f"Sprint: {issue['fields']['sprint']['name']}")
+        print(*(sprint for sprint in issue["fields"]["customfield_10631"]), sep="\n")
     else:
         print("empty dictionary!")
 
