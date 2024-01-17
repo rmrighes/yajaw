@@ -7,10 +7,6 @@ on:
     branches:
       - development
       - main
-  push:
-    branches:
-      - 'features/**'
-      - 'fixes/**'
 
 jobs:
   static-code-analyzers:
