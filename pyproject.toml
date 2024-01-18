@@ -21,7 +21,8 @@ classifiers = [
 ]
 dependencies = [
   "asyncio",
-  "httpx"
+  "httpx",
+  "syncasync"
 ]
 
 [project.urls]

@@ -1,6 +1,8 @@
 """TBD"""
 import asyncio
 
+from syncasync import async_to_sync
+
 from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
 from yajaw.core import rest
@@ -27,14 +29,9 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
         return []
 
 
-def fetch_all_projects(expand: str | None = None) -> list[dict]:
-    """Wrapper sync function for GET /project"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    coroutine = async_fetch_all_projects(expand=expand)
-    return loop.run_until_complete(coroutine)
+@async_to_sync
+async def fetch_all_projects(expand: str | None = None) -> list[dict]:
+    return await async_fetch_all_projects(expand=expand)
 
 
 async def async_fetch_project(project_key: str, expand: str | None = None) -> dict:
@@ -58,14 +55,10 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
         return {}
 
 
-def fetch_project(project_key: str, expand: str | None = None) -> dict:
+@async_to_sync
+async def fetch_project(project_key: str, expand: str | None = None) -> dict:
     """Wrapper sync function for GET /project/{key}"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    coroutine = async_fetch_project(project_key=project_key, expand=expand)
-    return loop.run_until_complete(coroutine)
+    return await async_fetch_project(project_key=project_key, expand=expand)
 
 
 async def async_fetch_projects_from_list(
@@ -95,14 +88,12 @@ async def async_fetch_projects_from_list(
         return []
 
 
-def fetch_projects_from_list(project_keys: list[str], expand: str | None = None) -> list[dict]:
+@async_to_sync
+async def fetch_projects_from_list(
+    project_keys: list[str], expand: str | None = None
+) -> list[dict]:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    coroutine = async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
-    return loop.run_until_complete(coroutine)
+    return await async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
 
 
 async def async_fetch_issue(
@@ -130,16 +121,12 @@ async def async_fetch_issue(
         return {}
 
 
-def fetch_issue(
+@async_to_sync
+async def fetch_issue(
     issue_key: str, expand: str | None = None, agile: ApiType = ApiType.CLASSIC
 ) -> dict:
     """Wrapper sync function for GET /issue/{key}"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    coroutine = async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
-    return loop.run_until_complete(coroutine)
+    return await async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
 
 
 async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]:
@@ -164,11 +151,7 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
         return []
 
 
-def search_issues(jql: str, expand: str | None = None) -> list[dict]:
+@async_to_sync
+async def search_issues(jql: str, expand: str | None = None) -> list[dict]:
     """Wrapper sync function for POST /search"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    coroutine = async_search_issues(jql=jql, expand=expand)
-    return loop.run_until_complete(coroutine)
+    return await async_search_issues(jql=jql, expand=expand)
