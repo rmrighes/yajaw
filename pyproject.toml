@@ -57,7 +57,7 @@ cov = [
   "test-cov",
   "cov-report",
 ]
-type-check = "mypy --install-types --non-interactive ."
+type-check = "mypy --config-file=./pyproject.toml --install-types --non-interactive ."
 format-check = "black --diff ."
 formatter = "black ."
 isort-check = "isort --check-only --diff ."
