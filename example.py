@@ -188,7 +188,7 @@ def use_fetch_issue():
 @duration
 def use_fetch_issue_from_agile():
     """TBD"""
-    print("ASYNC AGILE RESOURCE: ISSUE/{KEY}")
+    print("AGILE RESOURCE: ISSUE/{KEY}")
     issue = jira.fetch_issue(issue_key="MLOPS-8730", expand="changelog", agile=ApiType.AGILE)
     if issue:
         # story_points = "customfield_10012"
