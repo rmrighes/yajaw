@@ -29,7 +29,10 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 def fetch_all_projects(expand: str | None = None) -> list[dict]:
     """Wrapper sync function for GET /project"""
-    loop = asyncio.new_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
     coroutine = async_fetch_all_projects(expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -57,7 +60,10 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
 
 def fetch_project(project_key: str, expand: str | None = None) -> dict:
     """Wrapper sync function for GET /project/{key}"""
-    loop = asyncio.new_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
     coroutine = async_fetch_project(project_key=project_key, expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -91,7 +97,10 @@ async def async_fetch_projects_from_list(
 
 def fetch_projects_from_list(project_keys: list[str], expand: str | None = None) -> list[dict]:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
-    loop = asyncio.new_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
     coroutine = async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
     return loop.run_until_complete(coroutine)
 
@@ -125,7 +134,10 @@ def fetch_issue(
     issue_key: str, expand: str | None = None, agile: ApiType = ApiType.CLASSIC
 ) -> dict:
     """Wrapper sync function for GET /issue/{key}"""
-    loop = asyncio.new_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
     coroutine = async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
     return loop.run_until_complete(coroutine)
 
@@ -154,6 +166,9 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
 
 def search_issues(jql: str, expand: str | None = None) -> list[dict]:
     """Wrapper sync function for POST /search"""
-    loop = asyncio.new_event_loop()
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
     coroutine = async_search_issues(jql=jql, expand=expand)
     return loop.run_until_complete(coroutine)
