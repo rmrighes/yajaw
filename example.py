@@ -227,7 +227,7 @@ def use_fetch_issues_from_sprints():
 
 
 if __name__ == "__main__":
-    CONCURRENT = True
+    CONCURRENT = False
 
     if not CONCURRENT:
         sync_main()
