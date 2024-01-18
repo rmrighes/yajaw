@@ -1,7 +1,7 @@
 """TBD"""
 import asyncio
 
-from syncasync import async_to_sync # type: ignore
+from syncasync import async_to_sync  # type: ignore
 
 from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
