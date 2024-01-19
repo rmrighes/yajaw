@@ -21,7 +21,8 @@ classifiers = [
 ]
 dependencies = [
   "asyncio",
-  "httpx"
+  "httpx",
+  "wrapt"
 ]
 
 [project.urls]
@@ -39,7 +40,7 @@ dependencies = [
   "pytest",
   "pytest-asyncio",
   "mypy",
-  "black",
+  "black[jupyter]",
   "pylint",
   "bandit",
   "isort"
@@ -108,3 +109,8 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+
+
+[[tool.mypy.overrides]]
+module = "wrapt"
+ignore_missing_imports = true

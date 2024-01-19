@@ -1,5 +1,6 @@
 """TBD"""
 import asyncio
+from collections.abc import Coroutine
 
 from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
@@ -29,8 +30,8 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 
 @async_to_sync
-async def fetch_all_projects(expand: str | None = None) -> list[dict]:
-    return await async_fetch_all_projects(expand=expand)
+def fetch_all_projects(expand: str | None = None) -> list[dict] | Coroutine:
+    return async_fetch_all_projects(expand=expand)
 
 
 async def async_fetch_project(project_key: str, expand: str | None = None) -> dict:
@@ -55,9 +56,9 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
 
 
 @async_to_sync
-async def fetch_project(project_key: str, expand: str | None = None) -> dict:
+def fetch_project(project_key: str, expand: str | None = None) -> dict | Coroutine:
     """Wrapper sync function for GET /project/{key}"""
-    return await async_fetch_project(project_key=project_key, expand=expand)
+    return async_fetch_project(project_key=project_key, expand=expand)
 
 
 async def async_fetch_projects_from_list(
@@ -88,11 +89,11 @@ async def async_fetch_projects_from_list(
 
 
 @async_to_sync
-async def fetch_projects_from_list(
+def fetch_projects_from_list(
     project_keys: list[str], expand: str | None = None
-) -> list[dict]:
+) -> list[dict] | Coroutine:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
-    return await async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
+    return async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
 
 
 async def async_fetch_issue(
@@ -121,11 +122,11 @@ async def async_fetch_issue(
 
 
 @async_to_sync
-async def fetch_issue(
+def fetch_issue(
     issue_key: str, expand: str | None = None, agile: ApiType = ApiType.CLASSIC
-) -> dict:
+) -> dict | Coroutine:
     """Wrapper sync function for GET /issue/{key}"""
-    return await async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
+    return async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
 
 
 async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]:
@@ -151,6 +152,6 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
 
 
 @async_to_sync
-async def search_issues(jql: str, expand: str | None = None) -> list[dict]:
+def search_issues(jql: str, expand: str | None = None) -> list[dict] | Coroutine:
     """Wrapper sync function for POST /search"""
-    return await async_search_issues(jql=jql, expand=expand)
+    return async_search_issues(jql=jql, expand=expand)
