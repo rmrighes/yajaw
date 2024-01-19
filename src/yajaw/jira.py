@@ -1,11 +1,10 @@
 """TBD"""
 import asyncio
 
-from asgiref.sync import async_to_sync
-
 from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
 from yajaw.core import rest
+from yajaw.utils.concurrency import async_to_sync
 
 
 async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
