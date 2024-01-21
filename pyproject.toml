@@ -59,8 +59,8 @@ cov = [
 type-check = "mypy --config-file=./pyproject.toml --install-types --non-interactive ."
 format-check = "black --diff ."
 formatter = "black ."
-isort-check = "isort --check-only --diff ."
-importsort = "isort ."
+isort-check = "isort -v --check-only --diff ."
+importsort = "isort -v ."
 linter-check = "pylint **/*.py"
 security-check = "bandit -r . -c 'pyproject.toml'"
 
@@ -110,6 +110,10 @@ line-length = 100
 profile = "black"
 
 
-#[[tool.mypy.overrides]]
-#module = "wrapt"
-#ignore_missing_imports = true
+[tool.mypy]
+#disable_error_code = ["return-value"]
+pretty = true
+
+[[tool.mypy.overrides]]
+module = "yajaw.jira"
+disable_error_code = ["return-value"]

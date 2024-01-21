@@ -1,6 +1,8 @@
-"""TBD"""
+"""
+Module wrapping up the supported Jira resources.
+It is the external interface for yajaw users.
+"""
 import asyncio
-from collections.abc import Coroutine
 
 from yajaw import ApiType, YajawConfig
 from yajaw.core import exceptions as e
@@ -9,7 +11,24 @@ from yajaw.utils.concurrency import async_to_sync
 
 
 async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
-    """TBD"""
+    """
+    async_fetch_all_projects Async call to fetch all projects.
+
+    It is intended to be used on asynchronous code. Use the sync version otherwise.
+    Returns all projects visible to the user. It is based on the API
+    GET /rest/api/2/project. That resource is deprecated and will be replaced
+    by GET /rest/api/2/project/search, which will support pagination.
+
+
+    Args:
+        expand (str | None, optional): Expect a simple string with a comma-separated
+        list of attributes to be expanded. They are: description, issueTypes, lead,
+        and projectKeys.
+
+    Returns:
+        list[dict]: List of dictionaries representing the returned projects.
+        An empty list is returned if nothing found.
+    """
     expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
@@ -30,12 +49,46 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 
 @async_to_sync
-def fetch_all_projects(expand: str | None = None) -> list[dict] | Coroutine:
+def fetch_all_projects(expand: str | None = None) -> list[dict]:
+    """
+    fetch_all_projects Sync call to fetch all projects.
+
+    It is intended to be used on synchronous code. Use the async version otherwise.
+    Returns all projects visible to the user. It is based on the API
+    GET /rest/api/2/project. That resource is deprecated and will be replaced
+    by GET /rest/api/2/project/search, which will support pagination.
+
+
+    Args:
+        expand (str | None, optional): Expect a simple string with a comma-separated
+        list of attributes to be expanded. They are: description, issueTypes, lead,
+        and projectKeys.
+
+    Returns:
+        list[dict]: List of dictionaries representing the returned projects.
+        An empty list is returned if nothing found.
+    """
     return async_fetch_all_projects(expand=expand)
 
 
 async def async_fetch_project(project_key: str, expand: str | None = None) -> dict:
-    """TBD"""
+    """
+    async_fetch_project Async call to fetch the details of a single project.
+
+     It is intended to be used on asynchronous code. Use the sync version otherwise.
+     Return the details of a single project. It is based on the API
+     GET /rest/api/2/project/{projectKey}.
+
+    Args:
+        project_key (str): Key identifier for the project.
+        expand (str | None, optional): Expect a simple string with a comma-separated
+        list of attributes to be expanded. They are: description, issueTypes, lead,
+        projectKeys, and issueTypeHierarchy. Defaults to None.
+
+    Returns:
+        dict: Dictionary with the project details. An empty dictionary is returned
+        if nothing is found.
+    """
     expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
@@ -56,8 +109,24 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
 
 
 @async_to_sync
-def fetch_project(project_key: str, expand: str | None = None) -> dict | Coroutine:
-    """Wrapper sync function for GET /project/{key}"""
+def fetch_project(project_key: str, expand: str | None = None) -> dict:
+    """
+    fetch_project Sync call to fetch the details of a single project.
+
+     It is intended to be used on synchronous code. Use the async version otherwise.
+     Return the details of a single project. It is based on the API
+     GET /rest/api/2/project/{projectKey}.
+
+    Args:
+        project_key (str): Key identifier for the project.
+        expand (str | None, optional): Expect a simple string with a comma-separated
+        list of attributes to be expanded. They are: description, issueTypes, lead,
+        projectKeys, and issueTypeHierarchy. Defaults to None.
+
+    Returns:
+        dict: Dictionary with the project details. An empty dictionary is returned
+        if nothing is found.
+    """
     return async_fetch_project(project_key=project_key, expand=expand)
 
 
@@ -89,9 +158,7 @@ async def async_fetch_projects_from_list(
 
 
 @async_to_sync
-def fetch_projects_from_list(
-    project_keys: list[str], expand: str | None = None
-) -> list[dict] | Coroutine:
+def fetch_projects_from_list(project_keys: list[str], expand: str | None = None) -> list[dict]:
     """Wrapper sync function for multiple calls on GET /project/{key}"""
     return async_fetch_projects_from_list(project_keys=project_keys, expand=expand)
 
@@ -124,7 +191,7 @@ async def async_fetch_issue(
 @async_to_sync
 def fetch_issue(
     issue_key: str, expand: str | None = None, agile: ApiType = ApiType.CLASSIC
-) -> dict | Coroutine:
+) -> dict:
     """Wrapper sync function for GET /issue/{key}"""
     return async_fetch_issue(issue_key=issue_key, expand=expand, agile=agile)
 
@@ -152,6 +219,6 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
 
 
 @async_to_sync
-def search_issues(jql: str, expand: str | None = None) -> list[dict] | Coroutine:
+def search_issues(jql: str, expand: str | None = None) -> list[dict]:
     """Wrapper sync function for POST /search"""
     return async_search_issues(jql=jql, expand=expand)
