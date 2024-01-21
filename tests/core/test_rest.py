@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from yajaw.configuration import YajawConfig
-from yajaw.core.exceptions import (
+from yajaw.exceptions import (
     InvalidResponseError,
     ResourceForbiddenError,
     ResourceMethodNotAllowedError,

@@ -2,7 +2,7 @@
 import asyncio
 
 from yajaw import ApiType, jira
-from yajaw.utils import duration
+from yajaw.utils.performance import duration
 
 
 async def async_main():

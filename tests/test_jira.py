@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from yajaw import jira
-from yajaw.core import exceptions as e
+from yajaw import exceptions as e
 
 #########
 # MOCK!!!

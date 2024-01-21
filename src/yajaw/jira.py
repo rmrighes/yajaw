@@ -4,8 +4,7 @@ It is the external interface for yajaw users.
 """
 import asyncio
 
-from yajaw import ApiType, YajawConfig
-from yajaw.core import exceptions as e
+from yajaw import exceptions as e, ApiType, YajawConfig
 from yajaw.core import rest
 from yajaw.utils.concurrency import async_to_sync
 
