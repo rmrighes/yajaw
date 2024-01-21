@@ -6,8 +6,7 @@ from http import HTTPStatus
 
 import httpx
 
-from yajaw import Option, YajawConfig
-from yajaw import exceptions
+from yajaw import Option, YajawConfig, exceptions
 
 
 class PersonalAccessTokenAuth(httpx.Auth):

@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from yajaw.configuration import YajawConfig
+from yajaw.core.rest import _retry_request, _retry_response_error_detected
 from yajaw.exceptions import (
     InvalidResponseError,
     ResourceForbiddenError,
@@ -13,7 +14,6 @@ from yajaw.exceptions import (
     ResourceNotFoundError,
     ResourceUnauthorizedError,
 )
-from yajaw.core.rest import _retry_request, _retry_response_error_detected
 
 
 @pytest.mark.asyncio
