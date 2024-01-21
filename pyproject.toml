@@ -21,8 +21,7 @@ classifiers = [
 ]
 dependencies = [
   "asyncio",
-  "httpx",
-  "wrapt"
+  "httpx"
 ]
 
 [project.urls]
@@ -111,6 +110,6 @@ line-length = 100
 profile = "black"
 
 
-[[tool.mypy.overrides]]
-module = "wrapt"
-ignore_missing_imports = true
+#[[tool.mypy.overrides]]
+#module = "wrapt"
+#ignore_missing_imports = true
