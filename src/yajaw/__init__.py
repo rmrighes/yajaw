@@ -8,7 +8,7 @@ from enum import Enum
 
 from yajaw.configuration import YajawConfig
 
-__all__ = ["jira", "configuration", "ApiType"]
+__all__ = ["jira", "configuration", "exceptions", "ApiType"]
 
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 Option = Enum("Confirmation", ["YES", "NO"])

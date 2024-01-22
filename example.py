@@ -2,12 +2,11 @@
 import asyncio
 
 from yajaw import ApiType, jira
-from yajaw.utils.decorators import duration
+from yajaw.utils.performance import duration
 
 
 async def async_main():
     """TBD"""
-
     await use_async_fetch_all_projects()
     print()
     await use_async_fetch_projects()

@@ -24,10 +24,10 @@ def duration(func):
                 return func(*args, **kwargs)
         else:
 
-            async def tmp():
+            async def async_wrapping():
                 with wrapping_logic():
                     return await func(*args, **kwargs)
 
-            return tmp()
+            return async_wrapping()
 
     return wrapper
