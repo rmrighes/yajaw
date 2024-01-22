@@ -1,3 +1,7 @@
+"""
+Module responsible for utilitarian decorators used to run async function
+synchronously.
+"""
 import asyncio
 import concurrent.futures
 import functools
@@ -5,7 +9,16 @@ import threading
 
 
 def async_to_sync(func):
+    """
+    async_to_sync Decorator used to run async function synchronously.
+
+    Decorated target functions with this one will determine the right
+    approach to execute the computation of asynchronous code, such as
+    running in thread safe mode, or managing the event loop to be used.
+    """
+
     async def main_wrap(args, kwargs, call_result):
+        "Main wrap logic that consists on running the async wrapped function."
         try:
             result = await func(*args, **kwargs)
         except asyncio.CancelledError as e:
@@ -15,7 +28,10 @@ def async_to_sync(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        "Function responsible for how to execute the asynchronous computation."
+
         def run_in_thread():
+            "Set up a new event loop and run it the until the main_wrap function is done."
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:

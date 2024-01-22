@@ -9,7 +9,7 @@ import httpx
 from yajaw import Option, YajawConfig, exceptions
 
 
-class PersonalAccessTokenAuth(httpx.Auth):
+class _PersonalAccessTokenAuth(httpx.Auth):
     """Class used for Personal Access Token auth in httpx."""
 
     def __init__(self, pat):
@@ -44,9 +44,9 @@ def _generate_url(resource: str, api: str) -> str:
     return f"{YajawConfig.JIRA_BASE_URL}/{api}/{resource}"
 
 
-def _generate_auth() -> PersonalAccessTokenAuth:
+def _generate_auth() -> _PersonalAccessTokenAuth:
     """Function responsible for generating the authentication info for HTTP requests."""
-    return PersonalAccessTokenAuth(YajawConfig.JIRA_PAT)
+    return _PersonalAccessTokenAuth(YajawConfig.JIRA_PAT)
 
 
 def _generate_client() -> httpx.AsyncClient:
@@ -60,12 +60,27 @@ def _generate_client() -> httpx.AsyncClient:
 
 
 class JiraInfo:
-    """TBD"""
+    """
+     Class representing the Jira instance.
+
+    This class is responsible for managing the configuration and parameter values used in
+    low level rest calls using httpx.
+    """
 
     def __init__(
         self,
         info: dict,
     ):
+        """
+        __init__ Initializer object for JiraInfo class.
+
+        It inititializes a JiraInfo object using the contents of the provided dictionary to
+        set the necessary parameter values for a successful request to a Jira API.
+
+        Args:
+            info (dict): Dictionary containing the information related to: method, resource, api,
+            params, and payload.
+        """
         self.__method = info["method"]
         self.__resource = info["resource"]
         self.__api = info["api"]
@@ -75,62 +90,146 @@ class JiraInfo:
 
     @property
     def method(self):
-        """TBD"""
+        """
+        method Getter for the 'method' attribute.
+
+        Returns:
+            str: String representation of the method to be used in a HTTP request.
+        """
         return self.__method
 
     @method.setter
     def method(self, mhd: str):
-        """TBD"""
+        """
+        method Setter for the 'method' attribute.
+
+        Args:
+            mhd (str): String representation of the HTTP method to be used in a HTTP request.
+
+        Returns:
+            None
+        """
         self.__method = mhd
 
     @property
     def resource(self):
-        """TBD"""
+        """
+        resource Getter for the 'resource' attribute.
+
+        Returns:
+            str: String representation of the resource to be used in a HTTP request.
+            It will be part of the url, together wil the API.
+        """
         return self.__resource
 
     @resource.setter
     def resource(self, rce: str):
-        """TBD"""
+        """
+        resource Setter for the 'resource' attribute.
+
+        Args:
+            rce (str): String representation of the resource to be used in a HTTP request.
+
+        Returns:
+            None
+        """
         self.__resource = rce
 
     @property
     def api(self):
-        """TBD"""
+        """
+        api Getter for the 'api' attribute.
+
+        Returns:
+            str: String representation of the API to be used in a HTTP request.
+            It will be part of the url, together with the resource.
+        """
         return self.__api
 
     @api.setter
     def api(self, api: str):
-        """TBD"""
+        """
+        api Setter for the 'api' attribute.
+
+        Args:
+            api (str): String representation of the API to be used in a HTTP request.
+            Not recommended calling it directly. Use the configuration file instead.
+
+        Returns:
+            None
+        """
         self.__api = api
 
     @property
     def url(self):
-        """TBD"""
+        """
+        url Getter for the 'url' attribute.
+
+        Returns:
+            str: String representation of the url to be used in a HTTP request.
+        """
         return self.__url
 
     @url.setter
     def url(self, url: str):
-        """TBD"""
+        """
+        url Setter for the 'url' attribute.
+
+        Args:
+            url (str): String representation of the url to be used in a HTTP request.
+            Not recommended calling it directly. Use the api and resource methods instead.
+
+        Returns:
+            None
+        """
         self.__url = url
 
     @property
     def params(self):
-        """TBD"""
+        """
+        params Getter for the 'params' attribute.
+
+        Returns:
+            dict: Dictionary representing the query parameters used in a HTTP request.
+        """
         return self.__params
 
     @params.setter
     def params(self, pms: dict):
-        """TBD"""
+        """
+        method Setter for the 'params' attribute.
+
+        Args:
+            params (dict): Dictionary representing the query parameters used in a HTTP request.
+
+        Returns:
+            None
+        """
         self.__params = pms
 
     @property
     def payload(self):
-        """TBD"""
+        """
+        payload Getter for the 'payload' attribute.
+
+        Returns:
+            dict: Dictionary representing the content used in a HTTP request.
+            It will be used as application/json content type.
+        """
         return self.__payload
 
     @payload.setter
     def payload(self, pad: dict):
-        """TBD"""
+        """
+        payload Setter for the 'payload' attribute.
+
+        Args:
+            payload (dict): Dictionary representing the content used in a HTTP request.
+            It will be used as application/json content type.
+
+        Returns:
+            None
+        """
         self.__payload = pad
 
 
@@ -200,23 +299,50 @@ async def _send_request(jira: JiraInfo, client: httpx.AsyncClient) -> httpx.Resp
 async def send_single_request(
     jira: JiraInfo, client: httpx.AsyncClient | None = None
 ) -> httpx.Response:
-    """Function wraps retry_request and returns a list of responses."""
+    """
+    send_single_request Sends a HTTP request to a Jira instance.
+
+    _extended_summary_
+
+    Args:
+        jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
+        client (httpx.AsyncClient | None, optional): A client object used in the HTTP request.
+        It may be already created when the function is called by send_paginated_requests. A new
+        client is created otherwise.
+
+    Raises:
+        exceptions.ResourceNotFoundError: Resource could not be found as informed.
+        exceptions.YajawError: An error happened on a HTTP request.
+
+    Returns:
+        httpx.Response: _description_
+    """
     try:
         if client is None:
             client = _generate_client()
         task = asyncio.create_task(_retry_request(jira=jira, client=client))
         response = await task
     except exceptions.ResourceNotFoundError as exc:
-        YajawConfig.LOGGER.warning("pending log message -- send_single_request")
+        YajawConfig.LOGGER.warning("Resource could not be found.")
         raise exceptions.ResourceNotFoundError from exc
     except exceptions.YajawError as e:
-        YajawConfig.LOGGER.exception("pending log message -- send_single_request")
+        YajawConfig.LOGGER.exception("An error happened on a HTTP request.")
         raise exceptions.YajawError from e
     return response
 
 
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
-    """Function that wraps send_single_request and and call it for all necessary pages."""
+    """
+    send_paginated_requests Sends a paginated HTTP request to a Jira instance.
+
+    _extended_summary_
+
+    Args:
+        jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
+
+    Returns:
+        list[httpx.Response]: List of response objects received from the requested pages.
+    """
     default_page_attr = YajawConfig.DEFAULT_PAGINATION
     jira_list = _create_jira_list_with_page_attr(page_attr_list=[default_page_attr], jira=jira)
     initial_jira = jira_list[0]
