@@ -1,33 +1,33 @@
-""" Module responsible for the definition of custom exceptions."""
+""" Module responsible for the definition of yajaw exceptions."""
 
 
 class YajawError(Exception):
-    "Base class for yajaw errors"
+    "Base class for yajaw errors."
 
 
 class InvalidResponseError(YajawError):
-    "Response is not valid!"
+    "Response is not valid."
 
 
 class HttpClientError(YajawError):
-    "Returned HTTP Status Code is 4xx"
+    "Returned HTTP Status Code is 4xx."
 
 
 class HttpServerError(YajawError):
-    "Returned HTTP Status Code is 5xx"
+    "Returned HTTP Status Code is 5xx."
 
 
 class ResourceUnauthorizedError(HttpClientError):
-    "Resource unauthorized"
+    "Resource unauthorized."
 
 
 class ResourceForbiddenError(HttpClientError):
-    "Resource forbidden"
+    "Resource forbidden."
 
 
 class ResourceNotFoundError(HttpClientError):
-    "Resource not found"
+    "Resource not found."
 
 
 class ResourceMethodNotAllowedError(HttpClientError):
-    "Resource does not support method"
+    "Resource does not support method."
