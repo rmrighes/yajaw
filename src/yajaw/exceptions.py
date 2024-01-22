@@ -1,33 +1,62 @@
-""" Module responsible for the definition of yajaw exceptions."""
+"""
+Module responsible for the definition of yajaw exceptions.
+"""
 
 
 class YajawError(Exception):
-    "Base class for yajaw errors."
+    """
+    Base class for yajaw errors.
+    Error is derived from super class Exception.
+    """
 
 
 class InvalidResponseError(YajawError):
-    "Response is not valid."
+    """
+    Response received is not valid. It is usually raised from
+    underlying problems, such as runtime errors in HTTP requests,
+    or processing the received results.
+    Error is derived from super class YajawError.
+    """
 
 
 class HttpClientError(YajawError):
-    "Returned HTTP Status Code is 4xx."
+    """
+    Base class for errors associated with a HTTP Status Code 4xx.
+    Error is derived from super class YajawError.
+    """
 
 
 class HttpServerError(YajawError):
-    "Returned HTTP Status Code is 5xx."
+    """
+    Base class for errors associated with a HTTP Status Code 5xx.
+    Error is derived from super class HttpClientError.
+    """
 
 
 class ResourceUnauthorizedError(HttpClientError):
-    "Resource unauthorized."
+    """
+    Authenticated user is unauthorized from access the resource.
+    Error is derived from super class HttpClientError.
+    """
 
 
 class ResourceForbiddenError(HttpClientError):
-    "Resource forbidden."
+    """
+    Authenticated user is forbidden from access the resource.
+    Error is derived from super class HttpClientError.
+    """
 
 
 class ResourceNotFoundError(HttpClientError):
-    "Resource not found."
+    """
+    Requested resource could not be found as informed.
+    Error is derived from super class HttpClientError.
+    """
 
 
 class ResourceMethodNotAllowedError(HttpClientError):
-    "Resource does not support method."
+    """
+    Requested resource does not support the informed HTTP method.
+    Low level error for internal modules use.
+    Error is derived from super class HttpClientError.
+    """

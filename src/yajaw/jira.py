@@ -1,6 +1,6 @@
 """
 Module wrapping up the supported Jira resources.
-It is the external interface for yajaw users.
+It is the main external interface for yajaw users.
 """
 import asyncio
 
