@@ -3,4 +3,5 @@
 # SPDX-License-Identifier: MIT
 """File __about__.py responsible for yajaw package meta information."""
 
+
 __version__ = "0.0.2.dev4"
