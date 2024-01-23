@@ -44,7 +44,8 @@ dependencies = [
   "bandit",
   "isort",
   "mkdocs",
-  "mkdocs-material"
+  "mkdocs-material",
+  "mkdocstrings[python]"
 ]
 
 [tool.hatch.envs.default.scripts]

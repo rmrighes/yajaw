@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 """
-File __init__.py responsible for enabling the import of yajaw package and
-global configuration settings.
+Module responsible for the initialization of configuration settings.
+There's no need to import it directly.
 """
 
 from enum import Enum

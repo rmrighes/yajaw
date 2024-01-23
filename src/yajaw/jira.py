@@ -21,12 +21,12 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 
     Args:
-        expand (str | None, optional): Expect a simple string with a comma-separated
-        list of attributes to be expanded. They are: description, issueTypes, lead,
-        and projectKeys.
+        expand (str | None, optional): Expect a simple string with a comma-separated\
+        list of attributes to be expanded.\
+        They are: description, issueTypes, lead, and projectKeys.
 
     Returns:
-        list[dict]: List of dictionaries representing the returned projects.
+        List of dictionaries representing the returned projects.\
         An empty list is returned if nothing found.
     """
     expand_dict = {} if expand is None else {"expand": expand}
@@ -60,12 +60,12 @@ def fetch_all_projects(expand: str | None = None) -> list[dict]:
 
 
     Args:
-        expand (str | None, optional): Expect a simple string with a comma-separated
-        list of attributes to be expanded. They are: description, issueTypes, lead,
-        and projectKeys.
+        expand (str | None, optional): Expect a simple string with a comma-separated\
+        list of attributes to be expanded.\
+        They are: description, issueTypes, lead, and projectKeys.
 
     Returns:
-        list[dict]: List of dictionaries representing the returned projects.
+        list[dict]: List of dictionaries representing the returned projects.\
         An empty list is returned if nothing found.
     """
     return async_fetch_all_projects(expand=expand)
