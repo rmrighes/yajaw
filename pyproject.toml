@@ -42,7 +42,9 @@ dependencies = [
   "black[jupyter]",
   "pylint",
   "bandit",
-  "isort"
+  "isort",
+  "mkdocs",
+  "mkdocs-material"
 ]
 
 [tool.hatch.envs.default.scripts]
