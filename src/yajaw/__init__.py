@@ -20,7 +20,7 @@ __all__ = ["jira", "configuration", "exceptions", "ApiType"]
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 Option = Enum("Confirmation", ["YES", "NO"])
 
-YajawConfig.load_settings()
+YajawConfig.load_initial_settings()
 
 correlation_id: ContextVar[uuid.UUID] = ContextVar(
     "correlation_id", default=uuid.UUID("00000000-0000-0000-0000-000000000000")

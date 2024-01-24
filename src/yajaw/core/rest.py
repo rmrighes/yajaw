@@ -61,7 +61,7 @@ def _generate_client() -> httpx.AsyncClient:
 
 class JiraInfo:
     """
-     Class representing the Jira instance.
+    Class representing the Jira instance.
 
     This class is responsible for managing the configuration and parameter values used in
     low level rest calls using httpx.
@@ -72,7 +72,7 @@ class JiraInfo:
         info: dict,
     ):
         """
-        __init__ Initializer object for JiraInfo class.
+        Initializer object for JiraInfo class.
 
         It inititializes a JiraInfo object using the contents of the provided dictionary to
         set the necessary parameter values for a successful request to a Jira API.
@@ -91,7 +91,7 @@ class JiraInfo:
     @property
     def method(self):
         """
-        method Getter for the 'method' attribute.
+        Getter for the 'method' attribute.
 
         Returns:
             str: String representation of the method to be used in a HTTP request.
@@ -101,7 +101,7 @@ class JiraInfo:
     @method.setter
     def method(self, mhd: str):
         """
-        method Setter for the 'method' attribute.
+        Setter for the 'method' attribute.
 
         Args:
             mhd (str): String representation of the HTTP method to be used in a HTTP request.
@@ -114,7 +114,7 @@ class JiraInfo:
     @property
     def resource(self):
         """
-        resource Getter for the 'resource' attribute.
+        Getter for the 'resource' attribute.
 
         Returns:
             str: String representation of the resource to be used in a HTTP request.
@@ -125,7 +125,7 @@ class JiraInfo:
     @resource.setter
     def resource(self, rce: str):
         """
-        resource Setter for the 'resource' attribute.
+        Setter for the 'resource' attribute.
 
         Args:
             rce (str): String representation of the resource to be used in a HTTP request.
@@ -138,7 +138,7 @@ class JiraInfo:
     @property
     def api(self):
         """
-        api Getter for the 'api' attribute.
+        Getter for the 'api' attribute.
 
         Returns:
             str: String representation of the API to be used in a HTTP request.
@@ -149,7 +149,7 @@ class JiraInfo:
     @api.setter
     def api(self, api: str):
         """
-        api Setter for the 'api' attribute.
+        Setter for the 'api' attribute.
 
         Args:
             api (str): String representation of the API to be used in a HTTP request.
@@ -163,7 +163,7 @@ class JiraInfo:
     @property
     def url(self):
         """
-        url Getter for the 'url' attribute.
+        Getter for the 'url' attribute.
 
         Returns:
             str: String representation of the url to be used in a HTTP request.
@@ -173,7 +173,7 @@ class JiraInfo:
     @url.setter
     def url(self, url: str):
         """
-        url Setter for the 'url' attribute.
+        Setter for the 'url' attribute.
 
         Args:
             url (str): String representation of the url to be used in a HTTP request.
@@ -187,7 +187,7 @@ class JiraInfo:
     @property
     def params(self):
         """
-        params Getter for the 'params' attribute.
+        Getter for the 'params' attribute.
 
         Returns:
             dict: Dictionary representing the query parameters used in a HTTP request.
@@ -197,7 +197,7 @@ class JiraInfo:
     @params.setter
     def params(self, pms: dict):
         """
-        method Setter for the 'params' attribute.
+        Setter for the 'params' attribute.
 
         Args:
             params (dict): Dictionary representing the query parameters used in a HTTP request.
@@ -210,7 +210,7 @@ class JiraInfo:
     @property
     def payload(self):
         """
-        payload Getter for the 'payload' attribute.
+        Getter for the 'payload' attribute.
 
         Returns:
             dict: Dictionary representing the content used in a HTTP request.
@@ -221,7 +221,7 @@ class JiraInfo:
     @payload.setter
     def payload(self, pad: dict):
         """
-        payload Setter for the 'payload' attribute.
+        Setter for the 'payload' attribute.
 
         Args:
             payload (dict): Dictionary representing the content used in a HTTP request.
@@ -300,9 +300,7 @@ async def send_single_request(
     jira: JiraInfo, client: httpx.AsyncClient | None = None
 ) -> httpx.Response:
     """
-    send_single_request Sends a HTTP request to a Jira instance.
-
-    _extended_summary_
+    Sends a HTTP request to a Jira instance.
 
     Args:
         jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
@@ -333,9 +331,7 @@ async def send_single_request(
 
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """
-    send_paginated_requests Sends a paginated HTTP request to a Jira instance.
-
-    _extended_summary_
+    Sends a paginated HTTP request to a Jira instance.
 
     Args:
         jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
@@ -420,7 +416,7 @@ def _create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo)
 
 
 def _retrieve_pagination_attributes(response: httpx.Response) -> dict:
-    """TBD"""
+    """Function that gets the pagination valuesa from response and returns a dict with them"""
     page_attr = {}
     response_json = response.json()
     page_attr["start_at"] = response_json["startAt"] if "startAt" in response_json else None
