@@ -6,6 +6,8 @@ Module responsible for the initialization of configuration settings.
 There's no need to import it directly.
 """
 
+import uuid
+from contextvars import ContextVar
 from enum import Enum
 
 from yajaw.configuration import YajawConfig
@@ -16,3 +18,8 @@ ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 Option = Enum("Confirmation", ["YES", "NO"])
 
 YajawConfig.load_settings()
+
+correlation_id: ContextVar[uuid.UUID] = ContextVar(
+    "correlation_id", default=uuid.UUID("00000000-0000-0000-0000-000000000000")
+)
+correlation_id.set(uuid.uuid4())

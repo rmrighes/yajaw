@@ -7,6 +7,16 @@ import tomllib
 from pathlib import Path
 from typing import ClassVar
 
+import yajaw
+
+
+class ContextFilter(logging.Filter):
+    """ "Provides correlation id parameter for the logger"""
+
+    def filter(self, record):
+        record.correlation_id = yajaw.correlation_id.get()
+        return True
+
 
 class YajawConfig:
     """
@@ -62,7 +72,6 @@ class YajawConfig:
             "agile_api_v1": "rest/agile/1.0",
             "greenhopper_api": "rest/greenhopper/1.0",
         },
-        "log": {"msg_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"},
         "retries": {"tries": 10, "delay": 0.0, "backoff": 2},
         "requests": {"timeout": 60},
         "concurrency": {"semaphore_limit": 50},
@@ -131,6 +140,7 @@ class YajawConfig:
                 YajawConfig._configuration_settings = tomllib.load(toml)
         except FileNotFoundError:
             ...
+        YajawConfig._configuration_settings["log"] = {}
         YajawConfig._configuration_settings["log"]["logger"] = YajawConfig.define_logger()
         limit = YajawConfig._configuration_settings["concurrency"]["semaphore_limit"]
         # Ensures da minimum value of 5 for the BoundedSemaphore
@@ -159,10 +169,18 @@ class YajawConfig:
             logging.Logger: The yajaw logging.Logger object.
         """
         logging.getLogger("httpx").setLevel(logging.WARNING)
-        logging.basicConfig(
-            level=logging.INFO, format=YajawConfig._configuration_settings["log"]["msg_format"]
+
+        logger = logging.getLogger("yajaw")
+        logger.setLevel(logging.DEBUG)
+
+        formatter = logging.Formatter(
+            "%(asctime)-27s %(name)-8s %(levelname)-8s [ %(correlation_id)s ] %(message)s"
         )
-        return logging.getLogger(__package__)
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        logger.addFilter(ContextFilter())
+        return logger
 
     @staticmethod
     def set_class_variables():
