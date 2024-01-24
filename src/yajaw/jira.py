@@ -230,7 +230,7 @@ async def async_fetch_issue(
         dict: Dictionary with the issue details. An empty dictionary is returned
         if nothing is found.
     """
-    # correlation_id.set(uuid.uuid4())
+    correlation_id.set(uuid.uuid4())
 
     expand_dict = {} if expand is None else {"expand": expand}
 

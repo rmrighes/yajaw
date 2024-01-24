@@ -170,7 +170,7 @@ class YajawConfig:
         """
         logging.getLogger("httpx").setLevel(logging.WARNING)
 
-        logger = logging.getLogger("yajaw")
+        logger = logging.getLogger(__package__)
         logger.setLevel(logging.DEBUG)
 
         formatter = logging.Formatter(
