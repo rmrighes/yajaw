@@ -10,7 +10,7 @@ from typing import ClassVar
 import yajaw
 
 
-class ContextFilter(logging.Filter):
+class _ContextFilter(logging.Filter):
     """Provides correlation id parameter for the logger"""
 
     def filter(self, record):
@@ -182,7 +182,7 @@ class YajawConfig:
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
         logger.addHandler(ch)
-        logger.addFilter(ContextFilter())
+        logger.addFilter(_ContextFilter())
         return logger
 
     @staticmethod
