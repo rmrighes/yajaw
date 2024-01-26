@@ -7,16 +7,6 @@ import tomllib
 from pathlib import Path
 from typing import ClassVar
 
-import yajaw
-
-
-class _ContextFilter(logging.Filter):
-    """Provides correlation id parameter for the logger"""
-
-    def filter(self, record):
-        record.correlation_id = yajaw.correlation_id.get()
-        return True
-
 
 class YajawConfig:
     """
@@ -164,25 +154,18 @@ class YajawConfig:
         """
         Configures the logging.Logger used by yajaw.
 
-        Adjusts the logging level for some dependencies to avoid
-        an excess or lack of log data from them. It congure the
-        message format and logging level used by yajaw.
+        As a library, logger named 'yajaw' is set up but no additional configuration
+        is made to display the messages. NullHandler adapter is set to this logger.
+        Configure logging from the application. Extra parameter 'context_id' is set.
 
         Returns:
             The yajaw logging.Logger object.
         """
-        logging.getLogger("httpx").setLevel(logging.WARNING)
 
         logger = logging.getLogger(__package__)
-        logger.setLevel(logging.DEBUG)
-
-        formatter = logging.Formatter(
-            "%(asctime)-27s %(name)-8s %(levelname)-8s [ %(correlation_id)s ] %(message)s"
-        )
-        ch = logging.StreamHandler()
-        ch.setFormatter(formatter)
+        logger.setLevel(logging.CRITICAL)
+        ch = logging.NullHandler()
         logger.addHandler(ch)
-        logger.addFilter(_ContextFilter())
         return logger
 
     @staticmethod

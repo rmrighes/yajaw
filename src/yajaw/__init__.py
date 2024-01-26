@@ -22,11 +22,11 @@ Option = Enum("Confirmation", ["YES", "NO"])
 
 YajawConfig.load_initial_settings()
 
-correlation_id: ContextVar[uuid.UUID] = ContextVar(
-    "correlation_id", default=uuid.UUID("00000000-0000-0000-0000-000000000000")
+context_id: ContextVar[uuid.UUID] = ContextVar(
+    "context_id", default=uuid.UUID("00000000-0000-0000-0000-000000000000")
 )
 
-correlation_id.set(uuid.uuid4())
+context_id.set(uuid.uuid4())
 
 YajawConfig.LOGGER.info(
     f"Inititalized {__package__} successfully.\n"
