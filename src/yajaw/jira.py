@@ -3,9 +3,8 @@ Module wrapping up the supported Jira resources.
 It is the main external interface for yajaw users.
 """
 import asyncio
-import uuid
 
-from yajaw import ApiType, YajawConfig, context_id
+from yajaw import ApiType, YajawConfig
 from yajaw import exceptions as e
 from yajaw.core import rest
 from yajaw.utils.concurrency import async_to_sync
@@ -30,8 +29,6 @@ async def async_fetch_all_projects(expand: str | None = None) -> list[dict]:
         List of dictionaries representing the returned projects.\
         An empty list is returned if nothing found.
     """
-    context_id.set(uuid.uuid4())
-
     expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
@@ -92,8 +89,6 @@ async def async_fetch_project(project_key: str, expand: str | None = None) -> di
         Dictionary with the project details. An empty dictionary is returned\
         if nothing is found.
     """
-    context_id.set(uuid.uuid4())
-
     expand_dict = {} if expand is None else {"expand": expand}
 
     info = {
@@ -156,8 +151,6 @@ async def async_fetch_projects_from_list(
         List of dictionaries representing the returned projects.\
         An empty list is returned if nothing found.
     """
-    context_id.set(uuid.uuid4())
-
     expand_dict = {} if expand is None else {"expand": expand}
 
     info_list = [
@@ -230,8 +223,6 @@ async def async_fetch_issue(
         Dictionary with the issue details. An empty dictionary is returned\
         if nothing is found.
     """
-    context_id.set(uuid.uuid4())
-
     expand_dict = {} if expand is None else {"expand": expand}
 
     api = YajawConfig.SERVER_API if not agile else YajawConfig.AGILE_API
@@ -302,8 +293,6 @@ async def async_search_issues(jql: str, expand: str | None = None) -> list[dict]
         List of dictionaries representing the returned projects.\
         An empty list is returned if nothing found.
     """
-    context_id.set(uuid.uuid4())
-
     expand_dict = {} if expand is None else {"expand": expand}
     query = {"jql": jql}
 

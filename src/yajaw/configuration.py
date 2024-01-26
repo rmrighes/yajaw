@@ -162,7 +162,7 @@ class YajawConfig:
             The yajaw logging.Logger object.
         """
 
-        logger = logging.getLogger(__package__)
+        logger = logging.getLogger("yajaw")
         logger.setLevel(logging.CRITICAL)
         ch = logging.NullHandler()
         logger.addHandler(ch)
