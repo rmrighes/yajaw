@@ -1,68 +1,17 @@
-# YAJAW
+# Welcome to Yajaw Documentation
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+Welcome to the official documentation for Yajaw, the intuitive Python library designed to ease your interactions with JIRA APIs.
 
-## Code Annotation Examples
+Whether you're a developer, data analyst, or project manager, Yajaw provides the tools you need to seamlessly integrate JIRA's extensive API offerings into your Python applications.
 
-### Codeblocks
+## Features
 
-Some `code` goes here.
+- **Ease of Access**: Directly interface with both supported and unsupported JIRA API resources without the overhead of complex configurations.
+  
+- **Dual Support**: Utilize Yajaw's synchronous and asynchronous capabilities to suit different programming styles and requirements.
+  
+- **Data Representation**: Take advantage of Python's native constructs, as Yajaw handles the mapping of data to dictionaries and lists for convenient manipulation and analysis.
 
-### Plain codeblock
+- **Concurrent Pagination**: Efficiently handle paginated resources with built-in concurrent requests for speedy data retrieval.
 
-A plain codeblock:
-
-```
-Some code here
-def myfunction()
-// some comment
-```
-
-#### Code for a specific language
-
-Some more code with the `py` at the start:
-
-``` py
-import tensorflow as tf
-def whatever()
-```
-
-#### With a title
-
-``` py title="bubble_sort.py"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-#### With line numbers
-
-``` py linenums="1"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-#### Highlighting lines
-
-``` py hl_lines="2 3"
-def bubble_sort(items):
-    for i in range(len(items)):
-        for j in range(len(items) - 1 - i):
-            if items[j] > items[j + 1]:
-                items[j], items[j + 1] = items[j + 1], items[j]
-```
-
-## Icons and Emojs
-
-:smile: 
-
-:fontawesome-regular-face-laugh-wink:
-
-:fontawesome-brands-twitter:{ .twitter }
-
-:octicons-heart-fill-24:{ .heart }
+- **Simple Configuration**: Straightforward setup leveraging a separate configuration file for quick adjustments.

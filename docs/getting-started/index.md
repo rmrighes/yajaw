@@ -1,29 +1,27 @@
 ## Installation
 
+Ensure you have Python 3.11 or later before installing Yajaw. The package can be installed via `pip` using the following command:
 
-Package requires Python version >= 3.11 and can be installed via pip.
-
-``` linenums="0"
+```bash
 pip install yajaw
 ```
 
-Library expects for a specifc folder where the configuration files for the library and logging are available. Folder name is `.yajaw` and is expected to exist in your home folder.
-You can confirm where exactly this folder is by running the code:
+Yajaw requires a dedicated configuration directory named `.yajaw`, located in your home directory. To ascertain the path to your home directory, run this Python script:
 
-``` py linenums="1"
+```python
 from pathlib import Path
 
 print(Path.home())
 ```
 
-Library will create the folder and required files if is doesn't detect them. You still have to provide the specific settings for your JIRA instance.
+Should the `.yajaw` directory be absent, Yajaw will automatically create it and the necessary configuration files on first run. You are still responsible for providing your specific JIRA instance settings.
 
-Go to your home file and open the `yajaw.toml` file under `.yajaw` folder. It should look like:
+To configure, navigate to your home directory, open the `.yajaw` folder, and edit the `yajaw.toml` file. It contains default settings that you'll need to modify:
 
-``` toml
+```toml
 [jira]
-token = "CHANGE--Insert-PAT"
-base_url = "CHANGE--https://my-jira-domain.com"
+token = "YOUR_PERSONAL_ACCESS_TOKEN"
+base_url = "https://your-jira-domain.com"
 server_api_v2 = "rest/api/2"
 agile_api_v1 = "rest/agile/1.0"
 greenhopper_api = "rest/greenhopper/1.0"
@@ -43,65 +41,59 @@ semaphore_limit = 50
 page_results = 40
 ```
 
-Make the necessary adjustments on `token` and `base_url` key/value pairs under the `jira` header and save the file. Same can be accomplished programmatically via `yajaw.configuration` module. Refer to the [User Guide](../user-guide/index.md) for more details.
+Adjust the `token` and `base_url` with the correct values for your JIRA environment. If necessary, these adjustments can also be executed programmatically using the `yajaw.configuration` module. For further instructions, refer to the [User Guide](../user-guide/index.md).
 
+## Basic Use
 
-## Basic use
+The fundamental use of Yajaw involves importing the `yajaw.jira` module and calling one of its functions. For example:
 
-Most basic use of the library is done by importing the `yajaw.jira` module and calling one of its functions. For example: 
-
-``` py linenums='1'
+```python
 from yajaw import jira
 
 projects = jira.fetch_all_projects()
 
-# <class 'list'>
+# Displays <class 'list'>
 print(type(projects))
-# As many <class 'dict'> as projects you have access to
+# Displays the type of each accessed project, which is <class 'dict'>
 print(*[type(project) for project in projects], sep="\t")
 
-# Replace with a valid project key
+# Ensure to replace "ABC" with a valid project key
 project = jira.fetch_project(project_key="ABC")
-# <class 'dict'>
+# Displays <class 'dict'>
 print(type(project))
-
 ```
 
-Not that is a really useful example, but here is how to write an asynchronous version for the code above:
+An asynchronous code example for fetching projects can be written as follows:
 
-``` py linenums='1'
+```python
 import asyncio
 from yajaw import jira
 
 async def main():
-
     projects = await jira.async_fetch_all_projects()
 
-    # <class 'list'>
+    # Displays <class 'list'>
     print(type(projects))
-    # As many <class 'dict'> as projects you have access to
+    # Displays the type of each accessed project, which is <class 'dict'>
     print(*[type(project) for project in projects], sep="\t")
 
-    # Replace with a valid project key
-    project =  await jira.async_fetch_project(project_key="ABC")
-    # <class 'dict'>
+    # Ensure to replace "ABC" with a valid project key
+    project = await jira.async_fetch_project(project_key="ABC")
+    # Displays <class 'dict'>
     print(f"Type: {type(project)}")
 
 asyncio.run(main())
-
 ```
 
-As a rule of thumb, the functions follow a simple naming convention:
+To understand Yajaw's function naming convention, consider the following pattern:
 
-[`async_`] + `verb` + _ + `resource` + [`_from_list`], where:
+[`async_`] + `action` + `_` + `target_resource` + [`_from_list`]
 
-* [`async_`]: It is a prefix used in asynchrnous functions. Synch functions don't have the prefix.
-* `verb`: one of following verbs:
-    - `fetch` is used to read existing resources.
-    - `create` is used to create a new resource.
-    - `update` is used to update an existing resource.
-    - `delete` is used to remove an existing resource.
-* `resource`: It is the name of the accessed resource. It can include the `all` adverb.
-* [`from_list`]: It is used to call a basic function, one for each element of the list.
+Elements of the pattern:
 
-So a function named `async_fetch_projects_from_list` will call `async_fetch_project` for each project listed. Multiple calls will be made in parallel since the code is asynchronous. Each project will be represented in a dictionary that belongs to a list.
+- `async_`: An optional prefix for asynchronous functions. Omitted in synchronous functions.
+- `action`: Represents the operation such as `fetch`, `create`, `update`, or `delete`.
+- `target_resource`: Specifies the JIRA resource being accessed.
+- `_from_list`: When used, it denotes a function operating on each element of a list.
+
+Therefore, a function named `async_fetch_projects_from_list` would asynchronously execute `async_fetch_project` for every project given, with all calls happening in parallel, outputting a list of dictionaries, each representing a project.
