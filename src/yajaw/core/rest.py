@@ -61,176 +61,33 @@ def _generate_client() -> httpx.AsyncClient:
 
 class JiraInfo:
     """
-     Class representing the Jira instance.
-
-    This class is responsible for managing the configuration and parameter values used in
-    low level rest calls using httpx.
+    Class representing the Jira instance and the necessary parameters for HTTP requests.
     """
 
     def __init__(
         self,
-        info: dict,
+        method: str,
+        resource: str,
+        api: str,
+        params: dict | None = None,
+        payload: dict | None = None,
     ):
         """
-        __init__ Initializer object for JiraInfo class.
-
-        It inititializes a JiraInfo object using the contents of the provided dictionary to
-        set the necessary parameter values for a successful request to a Jira API.
+        Initializes a JiraInfo object with the given configuration.
 
         Args:
-            info (dict): Dictionary containing the information related to: method, resource, api,
-            params, and payload.
+            method (str): HTTP method to be used for the request.
+            resource (str): Resource part of the URL endpoint.
+            api (str): API part of the URL endpoint.
+            params (Optional[dict]): Parameters for the HTTP request; defaults to None.
+            payload (Optional[dict]): Payload for the HTTP request; defaults to None.
         """
-        self.__method = info["method"]
-        self.__resource = info["resource"]
-        self.__api = info["api"]
-        self.__url = _generate_url(resource=info["resource"], api=info["api"])
-        self.__params = info["params"]
-        self.__payload = info["payload"]
-
-    @property
-    def method(self):
-        """
-        method Getter for the 'method' attribute.
-
-        Returns:
-            str: String representation of the method to be used in a HTTP request.
-        """
-        return self.__method
-
-    @method.setter
-    def method(self, mhd: str):
-        """
-        method Setter for the 'method' attribute.
-
-        Args:
-            mhd (str): String representation of the HTTP method to be used in a HTTP request.
-
-        Returns:
-            None
-        """
-        self.__method = mhd
-
-    @property
-    def resource(self):
-        """
-        resource Getter for the 'resource' attribute.
-
-        Returns:
-            str: String representation of the resource to be used in a HTTP request.
-            It will be part of the url, together wil the API.
-        """
-        return self.__resource
-
-    @resource.setter
-    def resource(self, rce: str):
-        """
-        resource Setter for the 'resource' attribute.
-
-        Args:
-            rce (str): String representation of the resource to be used in a HTTP request.
-
-        Returns:
-            None
-        """
-        self.__resource = rce
-
-    @property
-    def api(self):
-        """
-        api Getter for the 'api' attribute.
-
-        Returns:
-            str: String representation of the API to be used in a HTTP request.
-            It will be part of the url, together with the resource.
-        """
-        return self.__api
-
-    @api.setter
-    def api(self, api: str):
-        """
-        api Setter for the 'api' attribute.
-
-        Args:
-            api (str): String representation of the API to be used in a HTTP request.
-            Not recommended calling it directly. Use the configuration file instead.
-
-        Returns:
-            None
-        """
-        self.__api = api
-
-    @property
-    def url(self):
-        """
-        url Getter for the 'url' attribute.
-
-        Returns:
-            str: String representation of the url to be used in a HTTP request.
-        """
-        return self.__url
-
-    @url.setter
-    def url(self, url: str):
-        """
-        url Setter for the 'url' attribute.
-
-        Args:
-            url (str): String representation of the url to be used in a HTTP request.
-            Not recommended calling it directly. Use the api and resource methods instead.
-
-        Returns:
-            None
-        """
-        self.__url = url
-
-    @property
-    def params(self):
-        """
-        params Getter for the 'params' attribute.
-
-        Returns:
-            dict: Dictionary representing the query parameters used in a HTTP request.
-        """
-        return self.__params
-
-    @params.setter
-    def params(self, pms: dict):
-        """
-        method Setter for the 'params' attribute.
-
-        Args:
-            params (dict): Dictionary representing the query parameters used in a HTTP request.
-
-        Returns:
-            None
-        """
-        self.__params = pms
-
-    @property
-    def payload(self):
-        """
-        payload Getter for the 'payload' attribute.
-
-        Returns:
-            dict: Dictionary representing the content used in a HTTP request.
-            It will be used as application/json content type.
-        """
-        return self.__payload
-
-    @payload.setter
-    def payload(self, pad: dict):
-        """
-        payload Setter for the 'payload' attribute.
-
-        Args:
-            payload (dict): Dictionary representing the content used in a HTTP request.
-            It will be used as application/json content type.
-
-        Returns:
-            None
-        """
-        self.__payload = pad
+        self.method = method
+        self.resource = resource
+        self.api = api
+        self.url = _generate_url(resource, api)
+        self.params = params or {}
+        self.payload = payload or {}
 
 
 def _retry_response_error_detected(result: httpx.Response) -> bool:
@@ -300,9 +157,7 @@ async def send_single_request(
     jira: JiraInfo, client: httpx.AsyncClient | None = None
 ) -> httpx.Response:
     """
-    send_single_request Sends a HTTP request to a Jira instance.
-
-    _extended_summary_
+    Sends a HTTP request to a Jira instance.
 
     Args:
         jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
@@ -333,9 +188,7 @@ async def send_single_request(
 
 async def send_paginated_requests(jira: JiraInfo) -> list[httpx.Response]:
     """
-    send_paginated_requests Sends a paginated HTTP request to a Jira instance.
-
-    _extended_summary_
+    Sends a paginated HTTP request to a Jira instance.
 
     Args:
         jira (JiraInfo): Object of JiraInfo class representing the Jira instance.
@@ -394,33 +247,44 @@ def _create_list_of_page_attr(page_attr: dict) -> list[dict]:
     return [{"startAt": page, "maxResults": page_attr["max_results"]} for page in page_attr_list]
 
 
+# Assuming _generate_params and _generate_payload behave as before, merging dictionaries
+
+
 def _create_jira_list_with_page_attr(page_attr_list: list[dict], jira: JiraInfo) -> list[JiraInfo]:
-    """Function that gets a list of page attributes and createa
-    a list with respective JiraInfo objects."""
+    """
+    Function that gets a list of page attributes and creates
+    a list with respective JiraInfo objects.
+    """
     jira_list = []
     for page_attr in page_attr_list:
-        unique_info = {
-            "method": jira.method,
-            "resource": jira.resource,
-            "api": jira.api,
-            "params": jira.params,
-            "payload": jira.payload,
-        }
-        if unique_info["method"] == "GET":
-            unique_info["params"] = _generate_params(
-                new_params=page_attr, existing_params=unique_info["params"]
+        if jira.method == "GET":
+            params = _generate_params(new_params=page_attr, existing_params=jira.params)
+            new_jira = JiraInfo(
+                method=jira.method,
+                resource=jira.resource,
+                api=jira.api,
+                params=params,
+                payload=jira.payload,
             )
-        if unique_info["method"] == "POST":
-            unique_info["payload"] = _generate_payload(
-                new_content=page_attr, existing_content=unique_info["payload"]
+        elif jira.method == "POST":
+            payload = _generate_payload(new_content=page_attr, existing_content=jira.payload)
+            new_jira = JiraInfo(
+                method=jira.method,
+                resource=jira.resource,
+                api=jira.api,
+                params=jira.params,
+                payload=payload,
             )
-        unique_jira = JiraInfo(info=unique_info)
-        jira_list.append(unique_jira)
+        else:
+            # Handle other HTTP methods or raise an error
+            new_jira = jira
+
+        jira_list.append(new_jira)
     return jira_list
 
 
 def _retrieve_pagination_attributes(response: httpx.Response) -> dict:
-    """TBD"""
+    """Function that gets the pagination valuesa from response and returns a dict with them"""
     page_attr = {}
     response_json = response.json()
     page_attr["start_at"] = response_json["startAt"] if "startAt" in response_json else None

@@ -17,23 +17,25 @@ class YajawConfig:
     the basic load and update configuration settings methods.
 
     Attributes:
-        JIRA_PAT: str
-        JIRA_BASE_URL: str
-        SERVER_API_V2: str
-        SERVER_API: str
-        AGILE_API_V1: str
-        AGILE_API: str
-        GREENHOPPER_API: str
-        TRIES: int
-        DELAY: float
-        BACKOFF: float
-        LOGGER: logging.Logger
-        SEMAPHORE: asyncio.BoundedSemaphore
-        TIMEOUT: int
-        DEFAULT_PAGINATION: dict
+        JIRA_PAT: Personal access token used to authenticate in Jira
+        JIRA_BASE_URL: Base url serving the Jira instance
+        SERVER_API_V2: Path serving the rest server API version 2
+        SERVER_API: Path serving the desired rest server API version
+        AGILE_API_V1: Path serving the rest agile API version 1
+        AGILE_API: Path serving the rest agile API version 1
+        GREENHOPPER_API: Path serving the internal rest greenhopper API
+        TRIES: How many time a request will be attempted before it fails
+        DELAY: Number of seconds to wait before submitting the next request
+        BACKOFF: Number multiplied against the delay to define its new value\
+        in order to adjust the load against the Jira instance
+        LOGGER: Logger instance created based on configuration settings
+        SEMAPHORE: Semaphore object created based on configuration settings
+        TIMEOUT: Number of seconds used to configure the semaphore timeout setting
+        DEFAULT_PAGINATION: Initial dictionary with the start position and number \
+        of results to be requested in paginated requests
 
     Raises:
-        NameError: Raised when it can't update the configuration
+        NameError: Raised when it can't update the configuration\
         using the provided section and settings.
     """
 
@@ -62,7 +64,6 @@ class YajawConfig:
             "agile_api_v1": "rest/agile/1.0",
             "greenhopper_api": "rest/greenhopper/1.0",
         },
-        "log": {"msg_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"},
         "retries": {"tries": 10, "delay": 0.0, "backoff": 2},
         "requests": {"timeout": 60},
         "concurrency": {"semaphore_limit": 50},
@@ -76,7 +77,7 @@ class YajawConfig:
         section: str, setting: str
     ) -> str | float | dict | logging.Logger | asyncio.BoundedSemaphore:
         """
-        configuration Retrieves the specified configuration.
+        Retrieves the specified configuration.
 
         Method returns the configuration setting for the provided
         section and setting
@@ -86,8 +87,7 @@ class YajawConfig:
             setting (str): Specific setting of the configuration under the section.
 
         Returns:
-            str | float | dict | logging.Logger | asyncio.BoundedSemaphore:
-            The configuration requested.
+            Value of the configuration requested.
         """
         return YajawConfig._configuration_settings[section][setting]
 
@@ -98,32 +98,34 @@ class YajawConfig:
         value: str | float | dict | logging.Logger | asyncio.BoundedSemaphore,
     ):
         """
-        update_configuration Save the provided setting to the configuration dictionary.
+        Update the provided configuration setting.
 
-        Method updates the configuration dictionary with the informed setting value
-        using the section and setting keys.
+        Updates the configuration dictionary with the informed setting value
+        using the section and setting keys and refresh the class attributes.
 
         Args:
             section (str): Section of the configuration.
-            setting (str): Specific setting of the configuration under the section.
-            value (str | float | dict | logging.Logger | asyncio.BoundedSemaphore):
+            setting (str): Specific setting of the configuration under the section.\
+            value (str | float | dict | logging.Logger | asyncio.BoundedSemaphore):\
             The setting value to be stored.
 
         Raises:
-            NameError: _description_
+            NameError: Can't update the configuration using the provided section and settings.
         """
         if section in YajawConfig.__sections:
             YajawConfig._configuration_settings[section][setting] = value
+            YajawConfig._set_class_variables()
         else:
             raise NameError
 
     @staticmethod
-    def load_settings():
+    def load_initial_settings():
         """
-        load_settings Load settings from the configuration file.
+        Load settings from the configuration file.
 
         Yajaw settings are loaded to a dictionary in memory from a configuration file, or
-        default values if the file is missing.
+        use default values if the file is missing. Jira instance and access must be updated
+        if no file is found.
         """
         fname = "yajaw.toml"
         try:
@@ -131,7 +133,8 @@ class YajawConfig:
                 YajawConfig._configuration_settings = tomllib.load(toml)
         except FileNotFoundError:
             ...
-        YajawConfig._configuration_settings["log"]["logger"] = YajawConfig.define_logger()
+        YajawConfig._configuration_settings["log"] = {}
+        YajawConfig._configuration_settings["log"]["logger"] = YajawConfig._define_logger()
         limit = YajawConfig._configuration_settings["concurrency"]["semaphore_limit"]
         # Ensures da minimum value of 5 for the BoundedSemaphore
         semaphore_limit = (
@@ -144,30 +147,31 @@ class YajawConfig:
             "startAt": 0,
             "maxResults": YajawConfig._configuration_settings["pagination"]["page_results"],
         }
-        YajawConfig.set_class_variables()
+        YajawConfig._set_class_variables()
 
     @staticmethod
-    def define_logger() -> logging.Logger:
+    def _define_logger() -> logging.Logger:
         """
-        define_logger Configures the logging.Logger used by yajaw.
+        Configures the logging.Logger used by yajaw.
 
-        Adjusts the logging level for some dependencies to avoid
-        an excess or lack of log data from them. It congure the
-        message format and logging level used by yajaw.
+        As a library, logger named 'yajaw' is set up but no additional configuration
+        is made to display the messages. NullHandler adapter is set to this logger.
+        Configure logging from the application. Extra parameter 'context_id' is set.
 
         Returns:
-            logging.Logger: The yajaw logging.Logger object.
+            The yajaw logging.Logger object.
         """
-        logging.getLogger("httpx").setLevel(logging.WARNING)
-        logging.basicConfig(
-            level=logging.INFO, format=YajawConfig._configuration_settings["log"]["msg_format"]
-        )
-        return logging.getLogger(__package__)
+
+        logger = logging.getLogger("yajaw")
+        logger.setLevel(logging.CRITICAL)
+        ch = logging.NullHandler()
+        logger.addHandler(ch)
+        return logger
 
     @staticmethod
-    def set_class_variables():
+    def _set_class_variables():
         """
-        set_class_variables Updates the class variablers with the setting from the dictionary.
+        Updates the class variablers with the setting from the dictionary.
 
         Yajaw settings are loaded to a dictionary in memory from a configuration file, or
         default values if the file is missing. The method takes the content from the

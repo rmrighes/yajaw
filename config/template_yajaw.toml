@@ -5,9 +5,6 @@ server_api_v2 = "rest/api/2"
 agile_api_v1 = "rest/agile/1.0"
 greenhopper_api = "rest/greenhopper/1.0"
 
-[log]
-msg_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
 [retries]
 tries = 10
 delay = 0.0

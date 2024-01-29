@@ -1,3 +1,6 @@
+# Mac files and folders
+.DS_Store
+
 # IDEs and editors
 .vscode
 

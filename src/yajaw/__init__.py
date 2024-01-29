@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 """
-File __init__.py responsible for enabling the import of yajaw package and
-global configuration settings.
+Module responsible for the initialization of configuration settings.
+There's no need to import it directly.
 """
 
 from enum import Enum
@@ -12,7 +12,8 @@ from yajaw.configuration import YajawConfig
 
 __all__ = ["jira", "configuration", "exceptions", "ApiType"]
 
+
 ApiType = Enum("API", ["CLASSIC", "AGILE", "INTERNAL"])
 Option = Enum("Confirmation", ["YES", "NO"])
 
-YajawConfig.load_settings()
+YajawConfig.load_initial_settings()
