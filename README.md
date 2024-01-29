@@ -2,6 +2,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/yajaw.svg)](https://pypi.org/project/yajaw)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/yajaw.svg)](https://pypi.org/project/yajaw)
+[![Documentation Status](https://readthedocs.org/projects/yajaw/badge/?version=latest)](https://yajaw.readthedocs.io/en/latest/?badge=latest)
 
 -----
 

@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/rmrighes/yajaw#readme"
+Documentation = "https://yajaw.readthedocs.io/"
 Issues = "https://github.com/unknown/rmrighes/issues"
 Source = "https://github.com/rmrighes/yajaw"
 
