@@ -6,4 +6,4 @@ File __about__.py responsible for yajaw package meta information.
 """
 
 
-__version__ = "0.1.0.dev1"
+__version__ = "0.1.0.dev2"
